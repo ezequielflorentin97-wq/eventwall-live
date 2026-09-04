@@ -1,0 +1,12 @@
+{
+  "colors": { "bg": "#0A0E1A", "primary": "#8FB4FF", "dark": "#4A6FBF", "text": "#DCE6FF", "uploadBg": "#0D1220" },
+  "fonts": { "display": "Sora", "body": "Sora" },
+  "texts": {
+    "homeTitle": "Nuestro Evento",
+    "qrSubtitle": "ESCANEÁ EL CÓDIGO CON TU CELULAR<br>ELEGÍ O SACÁ UNA FOTO Y SUBILA",
+    "uploadTitle": "COMPARTÍ<br>TU FOTO",
+    "footerText": "Escaneá el QR de tu mesa<br>y compartí las fotos del evento"
+  },
+  "slideshow": { "slideMs": 4000, "pauseMs": 30000 },
+  "rateLimit": { "max": 3, "windowMs": 120000 }
+}

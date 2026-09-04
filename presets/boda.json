@@ -1,0 +1,12 @@
+{
+  "colors": { "bg": "#0E0C0A", "primary": "#E8C9A0", "dark": "#B89268", "text": "#F5E9D8", "uploadBg": "#141210" },
+  "fonts": { "display": "Cormorant Garamond", "body": "Cormorant Garamond" },
+  "texts": {
+    "homeTitle": "Nuestra Boda",
+    "qrSubtitle": "ESCANEÁ EL CÓDIGO CON TU CELULAR<br>ELEGÍ O SACÁ UNA FOTO Y SUBILA",
+    "uploadTitle": "COMPARTÍ<br>TU FOTO",
+    "footerText": "Escaneá el QR que está en tu mesa<br>y compartí las fotos de nuestra boda"
+  },
+  "slideshow": { "slideMs": 4000, "pauseMs": 30000 },
+  "rateLimit": { "max": 3, "windowMs": 120000 }
+}

@@ -1,0 +1,12 @@
+{
+  "colors": { "bg": "#1A0E1F", "primary": "#FF7AC6", "dark": "#C74FA0", "text": "#FFE0F2", "uploadBg": "#20111F" },
+  "fonts": { "display": "Baloo 2", "body": "Nunito" },
+  "texts": {
+    "homeTitle": "¡Mi Cumple!",
+    "qrSubtitle": "ESCANEÁ EL CÓDIGO CON TU CELULAR<br>ELEGÍ O SACÁ UNA FOTO Y SUBILA",
+    "uploadTitle": "COMPARTÍ<br>TU FOTO",
+    "footerText": "Escaneá el QR de tu mesa<br>y compartí las fotos de la fiesta"
+  },
+  "slideshow": { "slideMs": 4000, "pauseMs": 30000 },
+  "rateLimit": { "max": 3, "windowMs": 120000 }
+}

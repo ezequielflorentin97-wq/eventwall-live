@@ -1,0 +1,12 @@
+{
+  "colors": { "bg": "#000000", "primary": "#F0C230", "dark": "#C9A84C", "text": "#F5DFA0", "uploadBg": "#080305" },
+  "fonts": { "display": "Cinzel Decorative", "body": "Cinzel" },
+  "texts": {
+    "homeTitle": "Mis XV",
+    "qrSubtitle": "ESCANEÁ EL CÓDIGO CON TU CELULAR<br>ELEGÍ O SACÁ UNA FOTO Y SUBILA",
+    "uploadTitle": "COMPARTÍ<br>TU FOTO",
+    "footerText": "Escaneá el QR que está en tu mesa<br>y compartí las fotos de mi fiesta"
+  },
+  "slideshow": { "slideMs": 4000, "pauseMs": 30000 },
+  "rateLimit": { "max": 3, "windowMs": 120000 }
+}
