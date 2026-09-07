@@ -12,7 +12,9 @@ export type EventConfig = Preset & {
   decorationUrl?: string
 }
 
-type Override = Partial<Preset> & { eventName: string; cloudinaryFolder: string; decorationUrl?: string }
+type DeepPartial<T> = { [K in keyof T]?: Partial<T[K]> }
+
+type Override = DeepPartial<Preset> & { eventName: string; cloudinaryFolder: string; decorationUrl?: string }
 
 export function mergeEventConfig(preset: Preset, override: Override): EventConfig {
   return {
