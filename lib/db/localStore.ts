@@ -19,6 +19,7 @@ export type EventRow = {
   config: EventConfig | null
   created_at: string
   configured_at: string | null
+  expires_at: string | null
 }
 
 // Local-mode-only persistence: a JSON file under local-data/, gitignored.
@@ -70,6 +71,7 @@ export async function insertEvent(input: {
     config: null,
     created_at: new Date().toISOString(),
     configured_at: null,
+    expires_at: null,
   }
   events.push(row)
   await writeAll(events)
@@ -78,7 +80,7 @@ export async function insertEvent(input: {
 
 export async function updateEvent(
   id: string,
-  patch: Partial<Pick<EventRow, 'slug' | 'config' | 'status' | 'configured_at'>>
+  patch: Partial<Pick<EventRow, 'slug' | 'config' | 'status' | 'configured_at' | 'expires_at'>>
 ): Promise<EventRow | null> {
   const events = await readAll()
   const index = events.findIndex((e) => e.id === id)
@@ -91,4 +93,9 @@ export async function updateEvent(
 export async function listSlugs(): Promise<string[]> {
   const events = await readAll()
   return events.map((e) => e.slug).filter((s): s is string => Boolean(s))
+}
+
+export async function listExpiredActiveEvents(nowIso: string = new Date().toISOString()): Promise<EventRow[]> {
+  const events = await readAll()
+  return events.filter((e) => e.status === 'activo' && e.expires_at !== null && e.expires_at < nowIso)
 }

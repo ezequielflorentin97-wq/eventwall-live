@@ -4,6 +4,7 @@ import type { EventConfig } from '../../lib/config'
 import { checkRateLimit, registerUpload } from './useRateLimit'
 import { uploadPhoto, fetchPhotos } from './useCloudinary'
 import { compressImage } from './compressImage'
+import { QrCode } from './QrCode'
 
 type View = 'home' | 'qr' | 'upload' | 'display'
 
@@ -91,8 +92,9 @@ function QrView({ config, guestUrl, onBack }: { config: EventConfig; guestUrl: s
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '1.6rem', padding: '2rem' }}>
       <h2 style={{ fontFamily: config.fonts.display }}>QR para invitados</h2>
+      <QrCode value={guestUrl} color={config.qrColor} />
       <p style={{ textAlign: 'center', maxWidth: 320 }} dangerouslySetInnerHTML={{ __html: config.texts.qrSubtitle }} />
-      <p style={{ wordBreak: 'break-all', fontSize: '0.8rem' }}>{guestUrl}</p>
+      <p style={{ wordBreak: 'break-all', fontSize: '0.75rem', opacity: 0.6 }}>{guestUrl}</p>
       <button onClick={onBack}>← Volver</button>
     </div>
   )

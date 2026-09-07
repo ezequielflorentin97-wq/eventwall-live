@@ -26,4 +26,22 @@ describe('mergeEventConfig', () => {
     expect(result.texts.footerText).toBe('texto custom')
     expect(result.texts.qrSubtitle).toBe('a')
   })
+
+  it('defaults qrColor to the merged primary color when not set', () => {
+    const result = mergeEventConfig(preset, {
+      eventName: 'Mis XV Kiara',
+      cloudinaryFolder: 'kiara-xv',
+      colors: { primary: '#FF00AA' },
+    })
+    expect(result.qrColor).toBe('#FF00AA')
+  })
+
+  it('lets an explicit qrColor override the primary color default', () => {
+    const result = mergeEventConfig(preset, {
+      eventName: 'Mis XV Kiara',
+      cloudinaryFolder: 'kiara-xv',
+      qrColor: '#000000',
+    })
+    expect(result.qrColor).toBe('#000000')
+  })
 })

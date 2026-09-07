@@ -4,6 +4,7 @@ import { isLocalMode } from '../../lib/localMode'
 import { listSlugs as listLocalSlugs, updateEvent as updateLocalEvent } from '../../lib/db/localStore'
 import { mergeEventConfig, type Preset } from '../../lib/config'
 import { slugify, withSuffixIfTaken } from '../../lib/slug'
+import { computeExpiresAt } from '../../lib/retention'
 import { PRESETS } from '../../lib/presets'
 
 export async function configureEvent(
@@ -14,6 +15,7 @@ export async function configureEvent(
     colors?: Partial<Preset['colors']>
     fonts?: Partial<Preset['fonts']>
     texts?: Partial<Preset['texts']>
+    qrColor?: string
   }
 ) {
   if (!PRESETS[input.preset]) {
@@ -35,12 +37,20 @@ export async function configureEvent(
     colors: input.colors,
     fonts: input.fonts,
     texts: input.texts,
+    qrColor: input.qrColor,
   })
 
   const configuredAt = new Date().toISOString()
+  const expiresAt = computeExpiresAt(configuredAt)
 
   if (isLocalMode()) {
-    const updated = await updateLocalEvent(eventId, { slug, config, status: 'activo', configured_at: configuredAt })
+    const updated = await updateLocalEvent(eventId, {
+      slug,
+      config,
+      status: 'activo',
+      configured_at: configuredAt,
+      expires_at: expiresAt,
+    })
     if (!updated) throw new Error(`No se encontró el evento local ${eventId}`)
     return { slug }
   }
@@ -48,7 +58,7 @@ export async function configureEvent(
   const supabase = getSupabaseServerClient()
   const { error } = await supabase
     .from('events')
-    .update({ slug, config, status: 'activo', configured_at: configuredAt })
+    .update({ slug, config, status: 'activo', configured_at: configuredAt, expires_at: expiresAt })
     .eq('id', eventId)
 
   if (error) throw new Error(`No se pudo configurar el evento: ${error.message}`)
