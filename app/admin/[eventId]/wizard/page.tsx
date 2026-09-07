@@ -4,6 +4,9 @@ import { useRouter, useParams } from 'next/navigation'
 import { configureEvent } from '../../actions'
 import { PRESET_NAMES, PRESETS } from '../../../../lib/presets'
 import { FONT_PAIRS, findFontPair, type FontPairId } from '../../../../lib/fontPairs'
+import { TEXT_EFFECTS, type TextEffectId } from '../../../../lib/textEffects'
+import { normalizeHexColor } from '../../../../lib/colorUtils'
+import { toStorage, toEditable } from '../../../../lib/lineBreaks'
 import { EventPreview } from '../../../../components/admin/EventPreview'
 import type { Preset } from '../../../../lib/config'
 
@@ -16,6 +19,48 @@ const COLOR_LABELS: Record<ColorKey, string> = {
   uploadBg: 'Fondo de la vista "Subir foto"',
 }
 
+function toEditableTexts(texts: Preset['texts']) {
+  return {
+    homeTitle: toEditable(texts.homeTitle),
+    qrSubtitle: toEditable(texts.qrSubtitle),
+    uploadTitle: toEditable(texts.uploadTitle),
+    footerText: toEditable(texts.footerText),
+  }
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (hex: string) => void }) {
+  const [text, setText] = useState(value)
+
+  function commit(raw: string) {
+    const normalized = normalizeHexColor(raw, value)
+    setText(normalized)
+    onChange(normalized)
+  }
+
+  return (
+    <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.85rem' }}>
+      {label}
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => {
+            setText(e.target.value)
+            onChange(e.target.value)
+          }}
+        />
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={(e) => commit(e.target.value)}
+          placeholder="#F0C230"
+          style={{ width: 100, fontFamily: 'monospace' }}
+        />
+      </div>
+    </label>
+  )
+}
+
 export default function Wizard() {
   const params = useParams<{ eventId: string }>()
   const router = useRouter()
@@ -24,9 +69,10 @@ export default function Wizard() {
   const [eventName, setEventName] = useState('')
   const [colors, setColors] = useState(PRESETS[PRESET_NAMES[0]].colors)
   const [fontPairId, setFontPairId] = useState<FontPairId>(FONT_PAIRS[0].id)
-  const [texts, setTexts] = useState(PRESETS[PRESET_NAMES[0]].texts)
+  const [texts, setTexts] = useState(toEditableTexts(PRESETS[PRESET_NAMES[0]].texts))
   const [qrColor, setQrColor] = useState(PRESETS[PRESET_NAMES[0]].colors.primary)
   const [qrColorTouched, setQrColorTouched] = useState(false)
+  const [titleEffect, setTitleEffect] = useState<TextEffectId>('ninguno')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -36,7 +82,7 @@ export default function Wizard() {
     setPresetId(id)
     const preset = PRESETS[id]
     setColors(preset.colors)
-    setTexts(preset.texts)
+    setTexts(toEditableTexts(preset.texts))
     if (!qrColorTouched) setQrColor(preset.colors.primary)
   }
 
@@ -52,11 +98,17 @@ export default function Wizard() {
     try {
       const { slug } = await configureEvent(params.eventId, {
         preset: presetId,
-        eventName,
+        eventName: toStorage(eventName),
         colors,
         fonts: { display: fontPair.display, body: fontPair.body },
-        texts,
+        texts: {
+          homeTitle: toStorage(texts.homeTitle),
+          qrSubtitle: toStorage(texts.qrSubtitle),
+          uploadTitle: toStorage(texts.uploadTitle),
+          footerText: toStorage(texts.footerText),
+        },
         qrColor,
+        titleEffect,
       })
       router.push(`/admin?configured=${slug}`)
     } catch (err) {
@@ -83,11 +135,12 @@ export default function Wizard() {
           </label>
 
           <label>
-            Nombre del evento
-            <input
+            Nombre del evento (podés usar Enter para un salto de línea)
+            <textarea
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
               required
+              rows={2}
               style={{ display: 'block', width: '100%' }}
             />
           </label>
@@ -103,61 +156,65 @@ export default function Wizard() {
             </select>
           </label>
 
+          <label>
+            Efecto del título
+            <select value={titleEffect} onChange={(e) => setTitleEffect(e.target.value as TextEffectId)} style={{ display: 'block', width: '100%' }}>
+              {TEXT_EFFECTS.map((fx) => (
+                <option key={fx.id} value={fx.id}>
+                  {fx.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <fieldset style={{ border: '1px solid #ddd', borderRadius: 8, padding: '1rem' }}>
             <legend>Colores</legend>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.8rem' }}>
+            <p style={{ fontSize: '0.75rem', color: '#888', marginTop: 0 }}>
+              Elegí el color con la paleta, o escribí el código si ya lo tenés (si te equivocás, se corrige solo).
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.8rem' }}>
               {(Object.keys(COLOR_LABELS) as ColorKey[]).map((key) => (
-                <label key={key} style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.85rem' }}>
-                  {COLOR_LABELS[key]}
-                  <input type="color" value={colors[key]} onChange={(e) => updateColor(key, e.target.value)} />
-                </label>
+                <ColorField key={key} label={COLOR_LABELS[key]} value={colors[key]} onChange={(v) => updateColor(key, v)} />
               ))}
             </div>
           </fieldset>
 
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.85rem' }}>
-            Color del QR
-            <input
-              type="color"
-              value={qrColor}
-              onChange={(e) => {
-                setQrColor(e.target.value)
-                setQrColorTouched(true)
-              }}
-            />
-          </label>
+          <ColorField
+            label="Color del QR"
+            value={qrColor}
+            onChange={(v) => {
+              setQrColor(v)
+              setQrColorTouched(true)
+            }}
+          />
 
           <fieldset style={{ border: '1px solid #ddd', borderRadius: 8, padding: '1rem' }}>
             <legend>Textos</legend>
-            <label style={{ display: 'block', marginBottom: '0.6rem' }}>
-              Título de inicio (usá &lt;br&gt; para salto de línea)
-              <input
-                value={texts.homeTitle}
-                onChange={(e) => setTexts((t) => ({ ...t, homeTitle: e.target.value }))}
-                style={{ display: 'block', width: '100%' }}
-              />
-            </label>
+            <p style={{ fontSize: '0.75rem', color: '#888', marginTop: 0 }}>Enter hace un salto de línea normal.</p>
             <label style={{ display: 'block', marginBottom: '0.6rem' }}>
               Subtítulo del QR
-              <input
+              <textarea
                 value={texts.qrSubtitle}
                 onChange={(e) => setTexts((t) => ({ ...t, qrSubtitle: e.target.value }))}
+                rows={2}
                 style={{ display: 'block', width: '100%' }}
               />
             </label>
             <label style={{ display: 'block', marginBottom: '0.6rem' }}>
               Título de &quot;Subir foto&quot;
-              <input
+              <textarea
                 value={texts.uploadTitle}
                 onChange={(e) => setTexts((t) => ({ ...t, uploadTitle: e.target.value }))}
+                rows={2}
                 style={{ display: 'block', width: '100%' }}
               />
             </label>
             <label style={{ display: 'block' }}>
               Texto del pie en pantalla
-              <input
+              <textarea
                 value={texts.footerText}
                 onChange={(e) => setTexts((t) => ({ ...t, footerText: e.target.value }))}
+                rows={2}
                 style={{ display: 'block', width: '100%' }}
               />
             </label>
@@ -177,6 +234,7 @@ export default function Wizard() {
             fontDisplay={fontPair.display}
             fontBody={fontPair.body}
             qrColor={qrColor}
+            titleEffect={titleEffect}
           />
         </div>
       </div>

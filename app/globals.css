@@ -47,3 +47,9 @@ a {
     color-scheme: dark;
   }
 }
+
+/* "Destello" title effect — see lib/textEffects.ts */
+@keyframes ew-destello {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}

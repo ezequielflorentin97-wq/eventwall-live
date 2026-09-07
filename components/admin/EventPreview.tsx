@@ -1,5 +1,6 @@
 'use client'
 import { QrCode } from '../event-app/QrCode'
+import { textEffectStyle } from '../../lib/textEffects'
 
 type PreviewProps = {
   eventName: string
@@ -7,12 +8,13 @@ type PreviewProps = {
   fontDisplay: string
   fontBody: string
   qrColor: string
+  titleEffect: string
 }
 
 // A mock of the home + QR views using the wizard's current form state — not
 // the real EventApp (that fetches photos from Cloudinary), just enough to
-// judge the palette/typography choice before saving.
-export function EventPreview({ eventName, colors, fontDisplay, fontBody, qrColor }: PreviewProps) {
+// judge the palette/typography/effect choice before saving.
+export function EventPreview({ eventName, colors, fontDisplay, fontBody, qrColor, titleEffect }: PreviewProps) {
   return (
     <div
       style={{
@@ -28,7 +30,17 @@ export function EventPreview({ eventName, colors, fontDisplay, fontBody, qrColor
         border: '1px solid #ddd',
       }}
     >
-      <p style={{ fontFamily: fontDisplay, color: colors.primary, fontSize: '1.6rem', textAlign: 'center', margin: 0 }}>
+      <p
+        style={{
+          fontFamily: fontDisplay,
+          color: colors.primary,
+          fontSize: '1.6rem',
+          textAlign: 'center',
+          margin: 0,
+          whiteSpace: 'pre-line',
+          ...textEffectStyle(titleEffect, colors.primary),
+        }}
+      >
         {eventName || 'Nombre del evento'}
       </p>
       <div style={{ display: 'flex', gap: '0.6rem' }}>

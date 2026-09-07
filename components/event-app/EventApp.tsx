@@ -5,6 +5,7 @@ import { checkRateLimit, registerUpload } from './useRateLimit'
 import { uploadPhoto, fetchPhotos } from './useCloudinary'
 import { compressImage } from './compressImage'
 import { QrCode } from './QrCode'
+import { textEffectStyle } from '../../lib/textEffects'
 
 type View = 'home' | 'qr' | 'upload' | 'display'
 
@@ -76,7 +77,12 @@ function HomeView({ config, onNavigate }: { config: EventConfig; onNavigate: (v:
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '2rem', padding: '2rem' }}>
       <h1
-        style={{ fontFamily: config.fonts.display, color: 'var(--primary)', textAlign: 'center' }}
+        style={{
+          fontFamily: config.fonts.display,
+          color: 'var(--primary)',
+          textAlign: 'center',
+          ...textEffectStyle(config.titleEffect, config.colors.primary),
+        }}
         dangerouslySetInnerHTML={{ __html: config.eventName }}
       />
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>

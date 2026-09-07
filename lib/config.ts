@@ -13,6 +13,8 @@ export type EventConfig = Preset & {
   // Falls back to the merged colors.primary when not set explicitly, so
   // every preset gets a sensible QR color for free.
   qrColor: string
+  // See lib/textEffects.ts — 'ninguno' when not set.
+  titleEffect: string
 }
 
 type DeepPartial<T> = { [K in keyof T]?: Partial<T[K]> }
@@ -22,6 +24,7 @@ type Override = DeepPartial<Preset> & {
   cloudinaryFolder: string
   decorationUrl?: string
   qrColor?: string
+  titleEffect?: string
 }
 
 export function mergeEventConfig(preset: Preset, override: Override): EventConfig {
@@ -31,6 +34,7 @@ export function mergeEventConfig(preset: Preset, override: Override): EventConfi
     cloudinaryFolder: override.cloudinaryFolder,
     decorationUrl: override.decorationUrl,
     qrColor: override.qrColor ?? colors.primary,
+    titleEffect: override.titleEffect ?? 'ninguno',
     colors,
     fonts: { ...preset.fonts, ...override.fonts },
     texts: { ...preset.texts, ...override.texts },
