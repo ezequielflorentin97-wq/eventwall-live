@@ -29,7 +29,14 @@ export default async function AdminEventList() {
                 <Link href={`/admin/${ev.id}/wizard`}>Configurar</Link>
               </>
             )}
-            {ev.status === 'activo' && <span> — /e/{ev.slug}</span>}
+            {ev.status === 'activo' && (
+              <span>
+                {' '}
+                — <Link href={`/e/${ev.slug}`}>/e/{ev.slug}</Link> · para el cliente:{' '}
+                <Link href={`/e/${ev.slug}/descargar`}>/e/{ev.slug}/descargar</Link>
+                {ev.expires_at && <> (vence {new Date(ev.expires_at).toLocaleDateString('es-AR')})</>}
+              </span>
+            )}
           </li>
         ))}
         {events.length === 0 && <p>Todavía no hay eventos pagados.</p>}
