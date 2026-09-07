@@ -1,13 +1,10 @@
 'use client'
 import { useState } from 'react'
+import { CLOUDINARY_CLOUDS as CLOUDS } from '../../lib/cloudinaryClouds'
 
 // Same unsigned-upload Cloudinary accounts as guest photos, but a fixed
 // "eventwall-branding" folder — logos are uploaded before the event has a
 // final slug (that's only generated when the wizard is submitted).
-const CLOUDS = [
-  { name: 'dberfji8v', preset: 'kiara_preset' },
-  { name: 'dtoq7eqee', preset: 'kiara_preset' },
-]
 
 async function uploadLogo(file: File): Promise<string> {
   let lastError: unknown = null

@@ -33,7 +33,8 @@ export default async function AdminEventList() {
               <span>
                 {' '}
                 — <Link href={`/e/${ev.slug}`}>/e/{ev.slug}</Link> · para el cliente:{' '}
-                <Link href={`/e/${ev.slug}/descargar`}>/e/{ev.slug}/descargar</Link>
+                <Link href={`/e/${ev.slug}/descargar`}>/e/{ev.slug}/descargar</Link> ·{' '}
+                <Link href={`/admin/${ev.id}/analytics`}>estadísticas</Link>
                 {ev.expires_at && <> (vence {new Date(ev.expires_at).toLocaleDateString('es-AR')})</>}
               </span>
             )}

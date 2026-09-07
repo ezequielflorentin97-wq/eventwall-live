@@ -1,13 +1,5 @@
 'use client'
-
-// Same dual-account fallback as the original kiara-xv-final.html: try the
-// primary Cloudinary account first, fall back to the secondary on any
-// error. Folder/tag now comes from the event's config instead of being a
-// hardcoded constant, so every event's photos stay isolated.
-const CLOUDS = [
-  { name: 'dberfji8v', preset: 'kiara_preset' },
-  { name: 'dtoq7eqee', preset: 'kiara_preset' },
-]
+import { CLOUDINARY_CLOUDS as CLOUDS } from '../../lib/cloudinaryClouds'
 
 export async function uploadPhoto(blob: Blob, folder: string, guestName?: string): Promise<void> {
   let lastError: unknown = null
@@ -32,23 +24,29 @@ export async function uploadPhoto(blob: Blob, folder: string, guestName?: string
   throw new Error(`No se pudo subir la foto a ninguna cuenta de Cloudinary: ${String(lastError)}`)
 }
 
-type CloudinaryResource = { secure_url?: string; url?: string; created_at: string }
+type CloudinaryResource = { secure_url?: string; url?: string; created_at: string; public_id: string }
 
-export async function fetchPhotos(folder: string): Promise<string[]> {
+export type PhotoEntry = { url: string; publicId: string; createdAt: string }
+
+export async function fetchPhotoEntries(folder: string): Promise<PhotoEntry[]> {
   const results = await Promise.allSettled(
     CLOUDS.map((c) =>
       fetch(`https://res.cloudinary.com/${c.name}/image/list/${folder}.json`).then((r) => r.json())
     )
   )
 
-  const entries: { url: string; createdAt: string }[] = []
+  const entries: PhotoEntry[] = []
   for (const r of results) {
     if (r.status === 'fulfilled' && Array.isArray(r.value?.resources)) {
       for (const res of r.value.resources as CloudinaryResource[]) {
         const url = res.secure_url ?? res.url
-        if (url) entries.push({ url, createdAt: res.created_at })
+        if (url) entries.push({ url, publicId: res.public_id, createdAt: res.created_at })
       }
     }
   }
-  return entries.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).map((e) => e.url)
+  return entries.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+}
+
+export async function fetchPhotos(folder: string): Promise<string[]> {
+  return (await fetchPhotoEntries(folder)).map((e) => e.url)
 }
