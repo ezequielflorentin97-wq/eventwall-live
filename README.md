@@ -28,6 +28,43 @@ Variables (producción):
 | `MERCADOPAGO_WEBHOOK_SECRET` | Mercado Pago → Tus integraciones → Webhooks → Firma secreta | **Secreta** — valida que las notificaciones vengan realmente de MP |
 | `MP_ARS_PER_USD` | Definido a mano | Los precios están en USD como referencia (ver brief de negocio); MP Argentina solo cobra en ARS, así que esto define la conversión. Actualizar periódicamente, no se calcula solo. |
 | `NEXT_PUBLIC_BASE_URL` | — | URL pública del dominio elegido (o `http://localhost:3000` en desarrollo) |
+| `CLOUDINARY_ADMIN_CLOUD_NAME` | Cloudinary → Dashboard | Nombre de la cuenta **paga** de producción (ver "Storage" abajo) — distinta de las 2 cuentas free actuales de upload/display |
+| `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Cloudinary → Dashboard → Access Keys | **Secretas** — habilitan la Admin API, necesaria para borrar fotos (el upload unsigned no puede) |
+| `CRON_SECRET` | Definido a mano (string random) | Protege `/api/cron/expire-events` — pasar como header `x-cron-secret` o `?secret=` al llamarlo |
+
+### Modo local (QA sin nada real)
+
+Con `LOCAL_MODE=true` (o simplemente sin `NEXT_PUBLIC_SUPABASE_URL` configurado) toda la
+capa de Supabase/Mercado Pago se reemplaza por un JSON local (`local-data/events.json`,
+gitignored) y un login por contraseña simple (`LOCAL_ADMIN_PASSWORD`). El "Comprar" de la
+landing crea el evento pagado directo, sin pasar por MP. Las fotos siguen yendo a las
+cuentas Cloudinary reales — eso funciona igual en local que en producción. Sirve para
+clickear el flujo completo antes de tener cuentas reales armadas.
+
+## Storage — por qué cambiar de las 2 cuentas free
+
+Hoy el upload/display sigue usando las 2 cuentas Cloudinary free con fallback (heredadas del
+proyecto original de Kiara). Para producción real, con borrado automático a los 30 días,
+recomendamos consolidar en **una cuenta Cloudinary paga** (plan Plus, desde ~US$99/mes,
+solo cuando haya volumen real):
+- El upload de invitados sigue siendo "unsigned" (sin login, como hoy) — eso no cambia.
+- Pero **borrar fotos requiere la Admin API** (API key + secret), que no existe en un
+  upload preset unsigned. Sin eso, `lib/cloudinaryAdmin.ts` lanza un error claro en vez de
+  fallar en silencio.
+- Alternativa más barata para arrancar: una sola cuenta free (no dos) — el secret existe en
+  cualquier plan, solo cambia la capacidad total de fotos.
+
+## Borrado automático a los 30 días
+
+`lib/retention.ts` calcula `expires_at = configured_at + 30 días` al activar cada evento
+(wizard). `app/api/cron/expire-events/route.ts` es la ruta que hay que llamar una vez por
+día (Vercel Cron Job, o cualquier scheduler externo con `GET` + header `x-cron-secret`):
+busca eventos `activo` vencidos, borra sus fotos en Cloudinary vía Admin API, y los marca
+`vencido`. Antes de vencer, `/e/<slug>/descargar` es el link que le das al cliente para que
+baje todas sus fotos en un ZIP (armado client-side, no necesita Admin API).
+
+**Bloqueado hasta tener `CLOUDINARY_ADMIN_CLOUD_NAME`/`CLOUDINARY_API_KEY`/`CLOUDINARY_API_SECRET`
+reales** — el código está listo pero el borrado real no se puede probar sin esas credenciales.
 
 ## Deploy
 
@@ -76,5 +113,7 @@ Variables (producción):
 - La convención `middleware.ts` está deprecada a favor de `proxy.ts` en Next 16 (sigue
   funcionando, es solo un warning de build) — migrar cuando haya tiempo dedicado a
   probarlo, no se hizo en este MVP para no arriesgar código ya verificado.
-- Falta un job que marque eventos como `vencido` automáticamente pasado el evento —
-  hoy ese estado existe en el schema pero nada lo setea todavía.
+- El job de expiración (`/api/cron/expire-events`) existe pero no está *agendado* — hay que
+  configurar un Vercel Cron Job (o similar) que lo llame una vez por día una vez deployado.
+- El borrado real en Cloudinary está bloqueado hasta tener una cuenta paga con Admin API
+  (ver "Storage" arriba) — hoy solo funciona el cálculo de fecha y el ZIP de descarga.
