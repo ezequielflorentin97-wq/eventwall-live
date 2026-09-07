@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { configureEvent, PRESET_NAMES } from '../../actions'
+import { configureEvent } from '../../actions'
+import { PRESET_NAMES } from '../../../../lib/presets'
 
 export default function Wizard() {
   const params = useParams<{ eventId: string }>()

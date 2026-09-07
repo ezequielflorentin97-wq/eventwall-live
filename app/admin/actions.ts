@@ -1,14 +1,10 @@
 'use server'
 import { getSupabaseServerClient } from '../../lib/supabaseServer'
+import { isLocalMode } from '../../lib/localMode'
+import { listSlugs as listLocalSlugs, updateEvent as updateLocalEvent } from '../../lib/db/localStore'
 import { mergeEventConfig, type Preset } from '../../lib/config'
 import { slugify, withSuffixIfTaken } from '../../lib/slug'
-import xv from '../../presets/xv.json'
-import boda from '../../presets/boda.json'
-import corporativo from '../../presets/corporativo.json'
-import cumpleanos from '../../presets/cumpleanos.json'
-
-const PRESETS: Record<string, Preset> = { xv, boda, corporativo, cumpleanos }
-export const PRESET_NAMES = Object.keys(PRESETS)
+import { PRESETS } from '../../lib/presets'
 
 export async function configureEvent(
   eventId: string,
@@ -27,9 +23,7 @@ export async function configureEvent(
     throw new Error('El nombre del evento no puede estar vacío')
   }
 
-  const supabase = getSupabaseServerClient()
-  const { data: existingEvents } = await supabase.from('events').select('slug')
-  const existingSlugs = (existingEvents ?? []).map((e) => e.slug).filter((v): v is string => Boolean(v))
+  const existingSlugs = isLocalMode() ? await listLocalSlugs() : await listSupabaseSlugs()
 
   const baseSlug = slugify(input.eventName)
   const slug = withSuffixIfTaken(baseSlug, existingSlugs)
@@ -43,12 +37,27 @@ export async function configureEvent(
     texts: input.texts,
   })
 
+  const configuredAt = new Date().toISOString()
+
+  if (isLocalMode()) {
+    const updated = await updateLocalEvent(eventId, { slug, config, status: 'activo', configured_at: configuredAt })
+    if (!updated) throw new Error(`No se encontró el evento local ${eventId}`)
+    return { slug }
+  }
+
+  const supabase = getSupabaseServerClient()
   const { error } = await supabase
     .from('events')
-    .update({ slug, config, status: 'activo', configured_at: new Date().toISOString() })
+    .update({ slug, config, status: 'activo', configured_at: configuredAt })
     .eq('id', eventId)
 
   if (error) throw new Error(`No se pudo configurar el evento: ${error.message}`)
 
   return { slug }
+}
+
+async function listSupabaseSlugs(): Promise<string[]> {
+  const supabase = getSupabaseServerClient()
+  const { data } = await supabase.from('events').select('slug')
+  return (data ?? []).map((e) => e.slug).filter((v): v is string => Boolean(v))
 }

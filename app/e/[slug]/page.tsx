@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getSupabaseServerClient } from '../../../lib/supabaseServer'
+import { isLocalMode } from '../../../lib/localMode'
+import { getEventBySlug } from '../../../lib/db/localStore'
 import { EventApp } from '../../../components/event-app/EventApp'
 import type { EventConfig } from '../../../lib/config'
 
@@ -12,13 +14,10 @@ export default async function EventPage({
 }) {
   const { slug } = await params
   const { mode } = await searchParams
-  const supabase = getSupabaseServerClient()
-  const { data: event } = await supabase
-    .from('events')
-    .select('*')
-    .eq('slug', slug)
-    .eq('status', 'activo')
-    .single()
+
+  const event = isLocalMode()
+    ? await getEventBySlug(slug, 'activo')
+    : await getSupabaseEvent(slug)
 
   if (!event) notFound()
 
@@ -31,4 +30,10 @@ export default async function EventPage({
       initialView={mode === 'camera' ? 'upload' : 'home'}
     />
   )
+}
+
+async function getSupabaseEvent(slug: string) {
+  const supabase = getSupabaseServerClient()
+  const { data } = await supabase.from('events').select('*').eq('slug', slug).eq('status', 'activo').single()
+  return data
 }
