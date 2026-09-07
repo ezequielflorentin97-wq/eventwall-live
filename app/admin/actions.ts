@@ -17,6 +17,7 @@ export async function configureEvent(
     texts?: Partial<Preset['texts']>
     qrColor?: string
     titleEffect?: string
+    logoUrl?: string
   }
 ) {
   if (!PRESETS[input.preset]) {
@@ -40,6 +41,7 @@ export async function configureEvent(
     texts: input.texts,
     qrColor: input.qrColor,
     titleEffect: input.titleEffect,
+    logoUrl: input.logoUrl,
   })
 
   const configuredAt = new Date().toISOString()

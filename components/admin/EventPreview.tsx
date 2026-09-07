@@ -9,12 +9,13 @@ type PreviewProps = {
   fontBody: string
   qrColor: string
   titleEffect: string
+  logoUrl?: string
 }
 
 // A mock of the home + QR views using the wizard's current form state — not
 // the real EventApp (that fetches photos from Cloudinary), just enough to
 // judge the palette/typography/effect choice before saving.
-export function EventPreview({ eventName, colors, fontDisplay, fontBody, qrColor, titleEffect }: PreviewProps) {
+export function EventPreview({ eventName, colors, fontDisplay, fontBody, qrColor, titleEffect, logoUrl }: PreviewProps) {
   return (
     <div
       style={{
@@ -30,6 +31,10 @@ export function EventPreview({ eventName, colors, fontDisplay, fontBody, qrColor
         border: '1px solid #ddd',
       }}
     >
+      {logoUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={logoUrl} alt="" style={{ maxWidth: 100, maxHeight: 70, objectFit: 'contain' }} />
+      )}
       <p
         style={{
           fontFamily: fontDisplay,

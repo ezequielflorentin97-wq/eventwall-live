@@ -76,6 +76,10 @@ export function EventApp({
 function HomeView({ config, onNavigate }: { config: EventConfig; onNavigate: (v: View) => void }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '2rem', padding: '2rem' }}>
+      {config.logoUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={config.logoUrl} alt="" style={{ maxWidth: 160, maxHeight: 120, objectFit: 'contain' }} />
+      )}
       <h1
         style={{
           fontFamily: config.fonts.display,
@@ -198,6 +202,14 @@ function DisplayView({ config, onBack }: { config: EventConfig; onBack: () => vo
       </div>
       {paused && (
         <div style={{ position: 'fixed', top: '1rem', right: '1rem' }}>Actualizando fotos…</div>
+      )}
+      {config.logoUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={config.logoUrl}
+          alt=""
+          style={{ position: 'fixed', bottom: '1.5vh', right: '1.5vw', maxWidth: 100, maxHeight: 80, objectFit: 'contain' }}
+        />
       )}
       <button style={{ position: 'fixed', top: '1rem', left: '1rem' }} onClick={onBack}>
         ← Volver

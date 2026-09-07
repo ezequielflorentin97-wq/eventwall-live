@@ -8,6 +8,7 @@ import { TEXT_EFFECTS, type TextEffectId } from '../../../../lib/textEffects'
 import { normalizeHexColor } from '../../../../lib/colorUtils'
 import { toStorage, toEditable } from '../../../../lib/lineBreaks'
 import { EventPreview } from '../../../../components/admin/EventPreview'
+import { LogoUploader } from '../../../../components/admin/LogoUploader'
 import type { Preset } from '../../../../lib/config'
 
 type ColorKey = keyof Preset['colors']
@@ -73,6 +74,7 @@ export default function Wizard() {
   const [qrColor, setQrColor] = useState(PRESETS[PRESET_NAMES[0]].colors.primary)
   const [qrColorTouched, setQrColorTouched] = useState(false)
   const [titleEffect, setTitleEffect] = useState<TextEffectId>('ninguno')
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -109,6 +111,7 @@ export default function Wizard() {
         },
         qrColor,
         titleEffect,
+        logoUrl,
       })
       router.push(`/admin?configured=${slug}`)
     } catch (err) {
@@ -166,6 +169,8 @@ export default function Wizard() {
               ))}
             </select>
           </label>
+
+          <LogoUploader value={logoUrl} onChange={setLogoUrl} />
 
           <fieldset style={{ border: '1px solid #ddd', borderRadius: 8, padding: '1rem' }}>
             <legend>Colores</legend>
@@ -235,6 +240,7 @@ export default function Wizard() {
             fontBody={fontPair.body}
             qrColor={qrColor}
             titleEffect={titleEffect}
+            logoUrl={logoUrl}
           />
         </div>
       </div>

@@ -10,6 +10,10 @@ export type EventConfig = Preset & {
   eventName: string
   cloudinaryFolder: string
   decorationUrl?: string
+  // Brand/event logo (company logo, sponsor logo, event crest) shown on the
+  // home view and display footer. Uploaded via the wizard — see
+  // components/admin/LogoUploader.tsx.
+  logoUrl?: string
   // Falls back to the merged colors.primary when not set explicitly, so
   // every preset gets a sensible QR color for free.
   qrColor: string
@@ -23,6 +27,7 @@ type Override = DeepPartial<Preset> & {
   eventName: string
   cloudinaryFolder: string
   decorationUrl?: string
+  logoUrl?: string
   qrColor?: string
   titleEffect?: string
 }
@@ -33,6 +38,7 @@ export function mergeEventConfig(preset: Preset, override: Override): EventConfi
     eventName: override.eventName,
     cloudinaryFolder: override.cloudinaryFolder,
     decorationUrl: override.decorationUrl,
+    logoUrl: override.logoUrl,
     qrColor: override.qrColor ?? colors.primary,
     titleEffect: override.titleEffect ?? 'ninguno',
     colors,
