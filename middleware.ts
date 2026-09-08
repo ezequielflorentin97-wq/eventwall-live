@@ -50,4 +50,9 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: ['/admin/:path*'],
+  // The default Edge runtime's fetch didn't trust this network's TLS-
+  // inspecting proxy, so the getUser() call to Supabase silently failed
+  // ("fetch failed") even with a valid session cookie. Node's runtime uses
+  // the OS certificate store, which does trust it.
+  runtime: 'nodejs',
 }
