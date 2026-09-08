@@ -14,6 +14,28 @@ npm run build   # build de producción + typecheck
 npm run lint
 ```
 
+### Si estás en una red corporativa con inspección TLS (ej. oficina de AVN)
+
+El servidor va a fallar al conectarse a Supabase/Cloudinary/Mercado Pago con
+`TypeError: fetch failed — unable to verify the first certificate`. Es porque
+el proxy de la red intercepta el tráfico HTTPS con su propio certificado, que
+Windows y el navegador confían pero Node no por defecto. Arrancar el dev
+server con:
+
+```bash
+NODE_OPTIONS=--use-system-ca npm run dev
+```
+
+(requiere Node 22.9+; ya viene seteado en el wrapper de lanzamiento local
+`run-eventwall.cmd`). En producción (Vercel/Netlify) esto no hace falta —
+esos servidores no pasan por la red corporativa.
+
+### Tabla `events`/`photo_votes`: "permission denied for table"
+
+Si Supabase devuelve `permission denied for table events` (no es RLS, es un
+GRANT de Postgres faltante), correr `supabase/migrations/0003_grants.sql` en
+el SQL Editor del proyecto.
+
 ## Variables de entorno requeridas
 
 Configurar en `.env.local` (desarrollo) y en Vercel → Project Settings → Environment
