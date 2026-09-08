@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createCheckoutPreference } from '../../../lib/mercadopago'
 import { PUBLIC_TIER_INFO, type TierId } from '../../../lib/tiers'
 import { isLocalMode } from '../../../lib/localMode'
+import { shouldSkipMercadoPago } from '../../../lib/paymentMode'
 import { insertEvent } from '../../../lib/db/localStore'
+import { getSupabaseServerClient } from '../../../lib/supabaseServer'
 
 const VALID_TIERS = PUBLIC_TIER_INFO.map((t) => t.id)
 
@@ -12,10 +14,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ tier
     return NextResponse.json({ error: 'tier inválido' }, { status: 400 })
   }
 
-  if (isLocalMode()) {
-    // No hay Mercado Pago real en modo local: el "pago" se simula creando
-    // el evento directamente como si el webhook ya hubiese confirmado.
-    await insertEvent({ tier: tier as TierId, customer_name: 'QA Local' })
+  if (shouldSkipMercadoPago()) {
+    // No hay Mercado Pago real todavía: el "pago" se simula creando el
+    // evento directamente como si el webhook ya hubiese confirmado — pero
+    // en la base de datos real (Supabase) si ya está configurada, no solo
+    // en modo local.
+    if (isLocalMode()) {
+      await insertEvent({ tier: tier as TierId, customer_name: 'QA sin MP' })
+    } else {
+      const supabase = getSupabaseServerClient()
+      await supabase.from('events').insert({
+        status: 'pagado_sin_configurar',
+        tier: tier as TierId,
+        customer_name: 'QA sin MP',
+      })
+    }
     return NextResponse.redirect(new URL('/admin', req.url))
   }
 
