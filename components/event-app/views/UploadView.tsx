@@ -4,14 +4,11 @@ import type { EventConfig } from '../../../lib/config'
 import { checkRateLimit, registerUpload } from '../useRateLimit'
 import { uploadPhoto } from '../useCloudinary'
 import { compressImage } from '../compressImage'
-import { applyFilter } from '../photoFilters'
-import { PHOTO_FILTERS, type PhotoFilterId } from '../../../lib/photoFilters'
 import { queuePhoto, listQueued, removeQueued } from '../offlineQueue'
 
 export function UploadView({ config, onBack }: { config: EventConfig; onBack: () => void }) {
   const [status, setStatus] = useState('')
   const [uploading, setUploading] = useState(false)
-  const [filter, setFilter] = useState<PhotoFilterId>('ninguno')
   const [pendingCount, setPendingCount] = useState(0)
 
   async function flushQueue() {
@@ -53,13 +50,12 @@ export function UploadView({ config, onBack }: { config: EventConfig; onBack: ()
     setStatus('Subiendo...')
     try {
       const compressed = await compressImage(file)
-      const filtered = filter === 'ninguno' ? compressed : await applyFilter(compressed, filter)
       try {
-        await uploadPhoto(filtered, config.cloudinaryFolder)
+        await uploadPhoto(compressed, config.cloudinaryFolder)
         registerUpload()
         setStatus('¡Foto compartida!')
       } catch {
-        await queuePhoto(config.cloudinaryFolder, filtered)
+        await queuePhoto(config.cloudinaryFolder, compressed)
         registerUpload()
         setStatus('Sin señal — guardamos tu foto y se envía sola apenas vuelva la conexión.')
         setPendingCount((n) => n + 1)
@@ -86,26 +82,42 @@ export function UploadView({ config, onBack }: { config: EventConfig; onBack: ()
     >
       <p style={{ fontFamily: config.fonts.display, textAlign: 'center' }} dangerouslySetInnerHTML={{ __html: config.texts.uploadTitle }} />
 
-      <label style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.3rem', alignItems: 'center' }}>
-        Filtro (opcional)
-        <select value={filter} onChange={(e) => setFilter(e.target.value as PhotoFilterId)}>
-          {PHOTO_FILTERS.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <UploadButton label="🖼 Elegir de galería" disabled={uploading} onFile={handleFile} />
+        <UploadButton label="📷 Sacar foto" disabled={uploading} capture onFile={handleFile} />
+      </div>
 
-      <input
-        type="file"
-        accept="image/*"
-        disabled={uploading}
-        onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-      />
       <p role="status">{status}</p>
       {pendingCount > 0 && <p style={{ fontSize: '0.75rem', opacity: 0.7 }}>{pendingCount} foto(s) esperando señal para enviarse…</p>}
       <button onClick={onBack}>← Volver</button>
     </div>
+  )
+}
+
+function UploadButton({
+  label,
+  disabled,
+  capture,
+  onFile,
+}: {
+  label: string
+  disabled: boolean
+  capture?: boolean
+  onFile: (file: File) => void
+}) {
+  return (
+    <label style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}>
+      <span style={{ border: '1px solid currentColor', borderRadius: 6, padding: '0.6rem 1rem', display: 'inline-block', opacity: disabled ? 0.5 : 1 }}>
+        {label}
+      </span>
+      <input
+        type="file"
+        accept="image/*"
+        capture={capture ? 'environment' : undefined}
+        disabled={disabled}
+        style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+        onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
+      />
+    </label>
   )
 }
