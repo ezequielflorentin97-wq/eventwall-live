@@ -7,7 +7,6 @@ import { QrView } from './views/QrView'
 import { UploadView } from './views/UploadView'
 import { DisplayView } from './views/DisplayView'
 import { RankingView } from './views/RankingView'
-import { GuestbookView } from './views/GuestbookView'
 
 export function EventApp({
   config,
@@ -41,7 +40,6 @@ export function EventApp({
       {view === 'upload' && <UploadView config={config} onBack={goHome} />}
       {view === 'display' && <DisplayView config={config} onBack={goHome} />}
       {view === 'ranking' && <RankingView config={config} onBack={goHome} />}
-      {view === 'guestbook' && <GuestbookView config={config} onBack={goHome} />}
     </div>
   )
 }

@@ -1,0 +1,312 @@
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.2rem;
+  padding: 3rem 1.5rem;
+  position: relative;
+  isolation: isolate;
+}
+
+.screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse 70% 55% at 50% 38%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.logo {
+  max-width: 150px;
+  max-height: 110px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.35));
+}
+
+.title {
+  text-align: center;
+  text-wrap: balance;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  font-size: clamp(1.7rem, 6vw, 2.6rem);
+}
+
+.rule {
+  width: min(220px, 60vw);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0.75;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.72;
+  text-align: center;
+}
+
+.btnGrid {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 480px;
+}
+
+.btn {
+  font-family: inherit;
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+  padding: 0.9rem 1.5rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover {
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btnSolid {
+  composes: btn;
+  background: var(--primary);
+  color: var(--bg);
+}
+
+.btnSolid:hover {
+  background: color-mix(in srgb, var(--primary) 88%, white);
+}
+
+.btnGhost {
+  composes: btn;
+  background: transparent;
+  border-color: color-mix(in srgb, var(--text) 35%, transparent);
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.btnGhost:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: none;
+}
+
+.backBtn {
+  composes: btnGhost;
+  position: fixed;
+  top: 1.2rem;
+  left: 1.2rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.7rem;
+  z-index: 20;
+  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+}
+
+.card {
+  background: color-mix(in srgb, var(--bg) 40%, black 15%);
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  border-radius: 18px;
+  padding: 2.2rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.qrFrame {
+  background: #fff;
+  padding: 0.9rem;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.helperText {
+  text-align: center;
+  max-width: 320px;
+  font-size: 0.92rem;
+  opacity: 0.85;
+  line-height: 1.65;
+}
+
+.mutedText {
+  font-size: 0.72rem;
+  opacity: 0.55;
+  word-break: break-all;
+  text-align: center;
+}
+
+.uploadChoices {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.uploadLabel {
+  cursor: pointer;
+}
+
+.uploadLabel:has(input:disabled) {
+  cursor: not-allowed;
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.statusText {
+  min-height: 1.2rem;
+  font-size: 0.85rem;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.pendingText {
+  font-size: 0.72rem;
+  opacity: 0.6;
+  text-align: center;
+}
+
+/* Display view */
+.stage {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.photo {
+  max-width: 74vw;
+  max-height: 76vh;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+  animation: photoIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes photoIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.stageFooter {
+  position: fixed;
+  bottom: 3.5vh;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.stageFooterText {
+  font-size: clamp(0.85rem, 1.6vw, 1.15rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.voteBtn {
+  composes: btn;
+  position: fixed;
+  top: 1.2rem;
+  right: 1.2rem;
+  z-index: 20;
+  font-size: 1rem;
+  padding: 0.6rem 1.1rem;
+  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+}
+
+.refreshBadge {
+  position: fixed;
+  top: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.stageLogo {
+  position: fixed;
+  bottom: 1.5vh;
+  right: 1.5vw;
+  max-width: 100px;
+  max-height: 80px;
+  object-fit: contain;
+  opacity: 0.92;
+}
+
+/* Ranking */
+.rankGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1.1rem;
+  width: 100%;
+  max-width: 720px;
+}
+
+.rankCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.rankImg {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.rankLabel {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}

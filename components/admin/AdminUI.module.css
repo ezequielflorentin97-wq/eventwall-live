@@ -1,0 +1,179 @@
+.page {
+  --accent: #4a3aff;
+  --accent-soft: #ecebff;
+  --accent-ink: #372bcc;
+  --good: #1f7a4d;
+  --good-soft: #e3f3ea;
+  --warn: #9a6300;
+  --warn-soft: #fbf0da;
+  --muted: #6b6f7a;
+  --muted-soft: #eceef2;
+  --ink: #16171d;
+  --ink-soft: #62626f;
+  --border: #e5e5ea;
+  --surface: #ffffff;
+
+  max-width: 880px;
+  margin: 3rem auto;
+  padding: 0 1.5rem 4rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--ink);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+}
+
+.header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.localBadge {
+  font-size: 0.72rem;
+  font-family: ui-monospace, monospace;
+  color: var(--warn);
+  background: var(--warn-soft);
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+}
+
+.eventList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.eventCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.1rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  box-shadow: 0 1px 2px rgba(16, 16, 30, 0.03);
+}
+
+.eventTop {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.eventName {
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+
+.tierChip {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--muted-soft);
+  color: var(--muted);
+}
+
+.statusPill {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  margin-left: auto;
+}
+
+.statusPending {
+  composes: statusPill;
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.statusActive {
+  composes: statusPill;
+  background: var(--good-soft);
+  color: var(--good);
+}
+
+.statusExpired {
+  composes: statusPill;
+  background: var(--muted-soft);
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.actionBtn:hover {
+  background: #fafafd;
+  border-color: #d3d3dc;
+}
+
+.actionPrimary {
+  composes: actionBtn;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.actionPrimary:hover {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+}
+
+.actionAccent {
+  composes: actionBtn;
+  color: var(--accent-ink);
+  border-color: var(--accent-soft);
+  background: var(--accent-soft);
+}
+
+.actionAccent:hover {
+  background: #e2dfff;
+  border-color: #d5d1ff;
+}
+
+.expiryNote {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  margin-left: 0.2rem;
+}
+
+.emptyState {
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}

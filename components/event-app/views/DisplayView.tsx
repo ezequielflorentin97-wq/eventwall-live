@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import type { EventConfig } from '../../../lib/config'
 import { fetchPhotoEntries, type PhotoEntry } from '../useCloudinary'
 import { castVote, fetchVotes, hasVoted } from '../useVotes'
+import styles from '../EventApp.module.css'
 
 export function DisplayView({ config, onBack }: { config: EventConfig; onBack: () => void }) {
   const [photos, setPhotos] = useState<PhotoEntry[]>([])
@@ -57,34 +58,26 @@ export function DisplayView({ config, onBack }: { config: EventConfig; onBack: (
   }
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className={styles.stage}>
       {current && (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={current.url} alt="" style={{ maxWidth: '70vw', maxHeight: '72vh', objectFit: 'contain', borderRadius: 8 }} />
-          <button
-            onClick={handleVote}
-            disabled={alreadyVoted}
-            style={{ position: 'fixed', top: '1rem', right: '1rem', fontSize: '1.1rem' }}
-          >
+          <img key={current.publicId} src={current.url} alt="" className={styles.photo} />
+          <button className={styles.voteBtn} onClick={handleVote} disabled={alreadyVoted}>
             {alreadyVoted ? '❤️' : '🤍'} {votes[current.publicId] ?? 0}
           </button>
         </>
       )}
-      {photos.length === 0 && <p>Esperando las primeras fotos…</p>}
-      <div style={{ position: 'fixed', bottom: '3vh', left: 0, right: 0, textAlign: 'center' }}>
-        <p style={{ fontFamily: config.fonts.display, color: 'var(--primary)' }} dangerouslySetInnerHTML={{ __html: config.texts.footerText }} />
+      {photos.length === 0 && <p className={styles.helperText}>Esperando las primeras fotos…</p>}
+      <div className={styles.stageFooter}>
+        <p className={styles.stageFooterText} style={{ fontFamily: config.fonts.display, color: 'var(--primary)' }} dangerouslySetInnerHTML={{ __html: config.texts.footerText }} />
       </div>
-      {paused && <div style={{ position: 'fixed', top: '1rem', left: '50%', transform: 'translateX(-50%)' }}>Actualizando fotos…</div>}
+      {paused && <div className={styles.refreshBadge}>Actualizando fotos…</div>}
       {config.logoUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={config.logoUrl}
-          alt=""
-          style={{ position: 'fixed', bottom: '1.5vh', right: '1.5vw', maxWidth: 100, maxHeight: 80, objectFit: 'contain' }}
-        />
+        <img src={config.logoUrl} alt="" className={styles.stageLogo} />
       )}
-      <button style={{ position: 'fixed', top: '1rem', left: '1rem' }} onClick={onBack}>
+      <button className={styles.backBtn} onClick={onBack}>
         ← Volver
       </button>
     </div>

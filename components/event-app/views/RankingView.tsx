@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import type { EventConfig } from '../../../lib/config'
 import { fetchPhotoEntries, type PhotoEntry } from '../useCloudinary'
 import { fetchVotes } from '../useVotes'
+import styles from '../EventApp.module.css'
 
 export function RankingView({ config, onBack }: { config: EventConfig; onBack: () => void }) {
   const [ranked, setRanked] = useState<(PhotoEntry & { votes: number })[]>([])
@@ -23,22 +24,26 @@ export function RankingView({ config, onBack }: { config: EventConfig; onBack: (
   }, [config.cloudinaryFolder])
 
   return (
-    <div style={{ minHeight: '100vh', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-      <h2 style={{ fontFamily: config.fonts.display, color: 'var(--primary)' }}>🏆 Top 5 fotos</h2>
-      {loading && <p>Cargando…</p>}
-      {!loading && ranked.length === 0 && <p>Todavía no hay votos.</p>}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', width: '100%', maxWidth: 700 }}>
+    <div className={styles.screen}>
+      <button className={styles.backBtn} onClick={onBack}>
+        ← Volver
+      </button>
+      <h2 className={styles.title} style={{ fontFamily: config.fonts.display, color: 'var(--primary)', fontSize: 'clamp(1.3rem, 4vw, 1.8rem)' }}>
+        🏆 Top 5 fotos
+      </h2>
+      {loading && <p className={styles.helperText}>Cargando…</p>}
+      {!loading && ranked.length === 0 && <p className={styles.helperText}>Todavía no hay votos.</p>}
+      <div className={styles.rankGrid}>
         {ranked.map((photo, i) => (
-          <div key={photo.publicId} style={{ textAlign: 'center' }}>
+          <div key={photo.publicId} className={styles.rankCard}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photo.url} alt="" style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 8 }} />
-            <p style={{ fontSize: '0.8rem', marginTop: '0.3rem' }}>
+            <img src={photo.url} alt="" className={styles.rankImg} />
+            <p className={styles.rankLabel}>
               #{i + 1} — ❤️ {photo.votes}
             </p>
           </div>
         ))}
       </div>
-      <button onClick={onBack}>← Volver</button>
     </div>
   )
 }

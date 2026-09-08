@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { getSupabaseServerClient } from '../../lib/supabaseServer'
 import { isLocalMode } from '../../lib/localMode'
 import { listEvents as listLocalEvents, type EventRow } from '../../lib/db/localStore'
+import styles from '../../components/admin/AdminUI.module.css'
+
+const TIER_LABEL: Record<string, string> = { basico: 'Básico', estandar: 'Estándar', premium: 'Premium' }
 
 async function loadEvents(): Promise<EventRow[]> {
   if (isLocalMode()) {
@@ -16,32 +19,72 @@ export default async function AdminEventList() {
   const events = await loadEvents()
 
   return (
-    <main style={{ maxWidth: 720, margin: '3rem auto', fontFamily: 'system-ui, sans-serif' }}>
-      <h1>Eventos</h1>
-      {isLocalMode() && <p style={{ fontSize: '0.8rem', color: '#888' }}>Modo local (QA) — datos en local-data/events.json.</p>}
-      <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+    <main className={styles.page}>
+      <div className={styles.header}>
+        <h1>Eventos</h1>
+        {isLocalMode() && <span className={styles.localBadge}>modo local · local-data/events.json</span>}
+      </div>
+
+      {events.length === 0 && <p className={styles.emptyState}>Todavía no hay eventos pagados.</p>}
+
+      <div className={styles.eventList}>
         {events.map((ev) => (
-          <li key={ev.id} style={{ border: '1px solid #ddd', borderRadius: 8, padding: '0.8rem 1rem' }}>
-            <strong>{ev.customer_name ?? ev.customer_email ?? ev.id}</strong> — {ev.tier} — {ev.status}
-            {ev.status === 'pagado_sin_configurar' && (
-              <>
-                {' '}
-                <Link href={`/admin/${ev.id}/wizard`}>Configurar</Link>
-              </>
-            )}
-            {ev.status === 'activo' && (
-              <span>
-                {' '}
-                — <Link href={`/e/${ev.slug}`}>/e/{ev.slug}</Link> · para el cliente:{' '}
-                <Link href={`/e/${ev.slug}/descargar`}>/e/{ev.slug}/descargar</Link> ·{' '}
-                <Link href={`/admin/${ev.id}/analytics`}>estadísticas</Link>
-                {ev.expires_at && <> (vence {new Date(ev.expires_at).toLocaleDateString('es-AR')})</>}
-              </span>
-            )}
-          </li>
+          <EventCard key={ev.id} event={ev} />
         ))}
-        {events.length === 0 && <p>Todavía no hay eventos pagados.</p>}
-      </ul>
+      </div>
     </main>
+  )
+}
+
+function EventCard({ event: ev }: { event: EventRow }) {
+  const displayName = ev.customer_name ?? ev.customer_email ?? 'Sin nombre'
+  const expired = ev.status === 'vencido'
+
+  return (
+    <div className={styles.eventCard}>
+      <div className={styles.eventTop}>
+        <span className={styles.eventName}>{displayName}</span>
+        <span className={styles.tierChip}>{TIER_LABEL[ev.tier] ?? ev.tier}</span>
+        <span
+          className={
+            ev.status === 'activo' ? styles.statusActive : ev.status === 'pagado_sin_configurar' ? styles.statusPending : styles.statusExpired
+          }
+        >
+          {ev.status === 'pagado_sin_configurar' ? 'Sin configurar' : ev.status === 'activo' ? 'Activo' : 'Vencido'}
+        </span>
+      </div>
+
+      <div className={styles.actions}>
+        {ev.status === 'pagado_sin_configurar' && (
+          <Link href={`/admin/${ev.id}/wizard`} className={styles.actionPrimary}>
+            ✏️ Configurar
+          </Link>
+        )}
+
+        {ev.status === 'activo' && ev.slug && (
+          <>
+            <Link href={`/e/${ev.slug}`} className={styles.actionPrimary}>
+              ▶ Ver evento
+            </Link>
+            <Link href={`/e/${ev.slug}/descargar`} className={styles.actionAccent}>
+              ⬇ Link de descarga
+            </Link>
+            <Link href={`/admin/${ev.id}/analytics`} className={styles.actionBtn}>
+              📊 Estadísticas
+            </Link>
+          </>
+        )}
+
+        {expired && ev.slug && (
+          <Link href={`/admin/${ev.id}/analytics`} className={styles.actionBtn}>
+            📊 Estadísticas
+          </Link>
+        )}
+      </div>
+
+      {ev.expires_at && !expired && (
+        <span className={styles.expiryNote}>Vence el {new Date(ev.expires_at).toLocaleDateString('es-AR')}</span>
+      )}
+    </div>
   )
 }

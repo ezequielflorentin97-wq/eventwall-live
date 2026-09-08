@@ -5,6 +5,7 @@ import { checkRateLimit, registerUpload } from '../useRateLimit'
 import { uploadPhoto } from '../useCloudinary'
 import { compressImage } from '../compressImage'
 import { queuePhoto, listQueued, removeQueued } from '../offlineQueue'
+import styles from '../EventApp.module.css'
 
 export function UploadView({ config, onBack }: { config: EventConfig; onBack: () => void }) {
   const [status, setStatus] = useState('')
@@ -68,28 +69,26 @@ export function UploadView({ config, onBack }: { config: EventConfig; onBack: ()
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        gap: '1.5rem',
-        padding: '2.5rem 1.5rem',
-        background: 'var(--upload-bg)',
-      }}
-    >
-      <p style={{ fontFamily: config.fonts.display, textAlign: 'center' }} dangerouslySetInnerHTML={{ __html: config.texts.uploadTitle }} />
+    <div className={styles.screen} style={{ background: 'var(--upload-bg)' }}>
+      <button className={styles.backBtn} onClick={onBack}>
+        ← Volver
+      </button>
 
-      <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <p
+        className={styles.title}
+        style={{ fontFamily: config.fonts.display, color: 'var(--primary)', fontSize: 'clamp(1.4rem, 5vw, 2rem)' }}
+        dangerouslySetInnerHTML={{ __html: config.texts.uploadTitle }}
+      />
+
+      <div className={styles.uploadChoices}>
         <UploadButton label="🖼 Elegir de galería" disabled={uploading} onFile={handleFile} />
         <UploadButton label="📷 Sacar foto" disabled={uploading} capture onFile={handleFile} />
       </div>
 
-      <p role="status">{status}</p>
-      {pendingCount > 0 && <p style={{ fontSize: '0.75rem', opacity: 0.7 }}>{pendingCount} foto(s) esperando señal para enviarse…</p>}
-      <button onClick={onBack}>← Volver</button>
+      <p className={styles.statusText} role="status">
+        {status}
+      </p>
+      {pendingCount > 0 && <p className={styles.pendingText}>{pendingCount} foto(s) esperando señal para enviarse…</p>}
     </div>
   )
 }
@@ -106,16 +105,14 @@ function UploadButton({
   onFile: (file: File) => void
 }) {
   return (
-    <label style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}>
-      <span style={{ border: '1px solid currentColor', borderRadius: 6, padding: '0.6rem 1rem', display: 'inline-block', opacity: disabled ? 0.5 : 1 }}>
-        {label}
-      </span>
+    <label className={`${styles.btn} ${styles.uploadLabel}`}>
+      {label}
       <input
         type="file"
         accept="image/*"
         capture={capture ? 'environment' : undefined}
         disabled={disabled}
-        style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+        className={styles.hiddenInput}
         onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
       />
     </label>
