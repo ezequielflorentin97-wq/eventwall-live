@@ -23,11 +23,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ tier
       await insertEvent({ tier: tier as TierId, customer_name: 'QA sin MP' })
     } else {
       const supabase = getSupabaseServerClient()
-      await supabase.from('events').insert({
+      const { error } = await supabase.from('events').insert({
         status: 'pagado_sin_configurar',
         tier: tier as TierId,
         customer_name: 'QA sin MP',
       })
+      if (error) {
+        return NextResponse.json({ error: `No se pudo crear el evento en Supabase: ${error.message}` }, { status: 500 })
+      }
     }
     return NextResponse.redirect(new URL('/admin', req.url))
   }
