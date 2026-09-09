@@ -23,9 +23,9 @@ export async function GET(req: NextRequest) {
     if (!config) continue
 
     try {
-      const { deleted } = await deleteFolderPhotos(config.cloudinaryFolder)
+      const { totalDeleted, perAccount } = await deleteFolderPhotos(config.cloudinaryFolder)
       await markVencido(event.id)
-      results.push({ slug: event.slug, deleted, ok: true })
+      results.push({ slug: event.slug, deleted: totalDeleted, perAccount, ok: true })
     } catch (err) {
       results.push({ slug: event.slug, ok: false, error: err instanceof Error ? err.message : String(err) })
     }

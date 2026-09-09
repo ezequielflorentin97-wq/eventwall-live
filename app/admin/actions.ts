@@ -11,6 +11,7 @@ import { mergeEventConfig, type EventConfig, type Preset } from '../../lib/confi
 import { slugify, withSuffixIfTaken } from '../../lib/slug'
 import { computeExpiresAt } from '../../lib/retention'
 import { PRESETS } from '../../lib/presets'
+import { deleteFolderPhotos, type DeleteFolderResult } from '../../lib/cloudinaryAdmin'
 
 export type WizardInitialData = {
   eventName: string
@@ -111,4 +112,16 @@ async function getSupabaseEventById(eventId: string): Promise<EventRow | null> {
   const supabase = getSupabaseServerClient()
   const { data } = await supabase.from('events').select('*').eq('id', eventId).maybeSingle()
   return data as EventRow | null
+}
+
+// Deletes every guest photo for one event from Cloudinary — for resetting
+// a demo/test run before the real event, without waiting for the 30-day
+// auto-expiry or touching Cloudinary's dashboard by hand. Does not change
+// the event's status/slug/expiry — it's a content reset, not a lifecycle one.
+export async function emptyEventPhotos(eventId: string): Promise<DeleteFolderResult> {
+  const row = isLocalMode() ? await getLocalEventById(eventId) : await getSupabaseEventById(eventId)
+  if (!row) throw new Error(`No se encontró el evento ${eventId}`)
+  if (!row.config?.cloudinaryFolder) throw new Error('Este evento todavía no tiene carpeta de fotos asignada.')
+
+  return deleteFolderPhotos(row.config.cloudinaryFolder)
 }

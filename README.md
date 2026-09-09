@@ -50,8 +50,8 @@ Variables (producción):
 | `MERCADOPAGO_WEBHOOK_SECRET` | Mercado Pago → Tus integraciones → Webhooks → Firma secreta | **Secreta** — valida que las notificaciones vengan realmente de MP |
 | `MP_ARS_PER_USD` | Definido a mano | Los precios están en USD como referencia (ver brief de negocio); MP Argentina solo cobra en ARS, así que esto define la conversión. Actualizar periódicamente, no se calcula solo. |
 | `NEXT_PUBLIC_BASE_URL` | — | URL pública del dominio elegido (o `http://localhost:3000` en desarrollo) |
-| `CLOUDINARY_ADMIN_CLOUD_NAME` | Cloudinary → Dashboard | Nombre de la cuenta **paga** de producción (ver "Storage" abajo) — distinta de las 2 cuentas free actuales de upload/display |
-| `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Cloudinary → Dashboard → Access Keys | **Secretas** — habilitan la Admin API, necesaria para borrar fotos (el upload unsigned no puede) |
+| `CLOUDINARY_DBERFJI8V_API_KEY` / `_API_SECRET` | Cloudinary → cuenta `dberfji8v` → Settings → Access Keys | **Secretas** — habilitan borrar fotos y ver uso de esa cuenta (el upload unsigned no puede) |
+| `CLOUDINARY_DTOQ7EQEE_API_KEY` / `_API_SECRET` | Cloudinary → cuenta `dtoq7eqee` → Settings → Access Keys | **Secretas** — ídem, para la segunda cuenta. Cualquiera de las dos puede quedar sin configurar: lo que dependa de ella se desactiva solo. |
 | `CRON_SECRET` | Definido a mano (string random) | Protege `/api/cron/expire-events` — pasar como header `x-cron-secret` o `?secret=` al llamarlo |
 
 ### Modo local (QA sin nada real)
@@ -63,30 +63,36 @@ landing crea el evento pagado directo, sin pasar por MP. Las fotos siguen yendo 
 cuentas Cloudinary reales — eso funciona igual en local que en producción. Sirve para
 clickear el flujo completo antes de tener cuentas reales armadas.
 
-## Storage — por qué cambiar de las 2 cuentas free
+## Storage — por qué cambiar de las 2 cuentas free (a futuro)
 
 Hoy el upload/display sigue usando las 2 cuentas Cloudinary free con fallback (heredadas del
-proyecto original de Kiara). Para producción real, con borrado automático a los 30 días,
-recomendamos consolidar en **una cuenta Cloudinary paga** (plan Plus, desde ~US$99/mes,
-solo cuando haya volumen real):
-- El upload de invitados sigue siendo "unsigned" (sin login, como hoy) — eso no cambia.
-- Pero **borrar fotos requiere la Admin API** (API key + secret), que no existe en un
-  upload preset unsigned. Sin eso, `lib/cloudinaryAdmin.ts` lanza un error claro en vez de
-  fallar en silencio.
-- Alternativa más barata para arrancar: una sola cuenta free (no dos) — el secret existe en
-  cualquier plan, solo cambia la capacidad total de fotos.
+proyecto original de Kiara), y el borrado/uso también corre contra esas dos (`lib/cloudinaryAdmin.ts`
+intenta ambas). Para producción con volumen real, en algún momento conviene consolidar en
+**una cuenta Cloudinary paga** (plan Plus, desde ~US$99/mes) — pero no hace falta para operar
+como está ahora.
+- El upload de invitados sigue siendo "unsigned" (sin login) — eso no cambia nunca.
+- **Borrar fotos y ver el uso de almacenamiento requieren la Admin API** (API key + secret
+  por cuenta), que no existe en un upload preset unsigned.
 
-## Borrado automático a los 30 días
+## Borrado de fotos — manual (admin) y automático (30 días)
 
-`lib/retention.ts` calcula `expires_at = configured_at + 30 días` al activar cada evento
-(wizard). `app/api/cron/expire-events/route.ts` es la ruta que hay que llamar una vez por
-día (Vercel Cron Job, o cualquier scheduler externo con `GET` + header `x-cron-secret`):
-busca eventos `activo` vencidos, borra sus fotos en Cloudinary vía Admin API, y los marca
+**Manual, desde el panel:** cada evento activo tiene un botón **"🗑️ Vaciar fotos"** en
+`/admin` — borra todas las fotos de ese evento en las cuentas Cloudinary configuradas, sin
+tocar el estado del evento, su link ni su fecha de vencimiento. Útil para resetear una
+prueba/demo antes del evento real.
+
+**Automático:** `lib/retention.ts` calcula `expires_at = configured_at + 30 días` al activar
+cada evento (wizard). `app/api/cron/expire-events/route.ts` es la ruta que hay que llamar una
+vez por día (Vercel/Netlify Scheduled Function, o cualquier scheduler externo con `GET` +
+header `x-cron-secret`): busca eventos `activo` vencidos, borra sus fotos, y los marca
 `vencido`. Antes de vencer, `/e/<slug>/descargar` es el link que le das al cliente para que
 baje todas sus fotos en un ZIP (armado client-side, no necesita Admin API).
 
-**Bloqueado hasta tener `CLOUDINARY_ADMIN_CLOUD_NAME`/`CLOUDINARY_API_KEY`/`CLOUDINARY_API_SECRET`
-reales** — el código está listo pero el borrado real no se puede probar sin esas credenciales.
+**Ambos bloqueados hasta tener `CLOUDINARY_DBERFJI8V_API_KEY`/`_API_SECRET` y/o
+`CLOUDINARY_DTOQ7EQEE_API_KEY`/`_API_SECRET` reales** — el código está listo, pero sin al
+menos una de esas 2 credenciales configuradas no hay forma de borrar nada de verdad. El panel
+de `/admin` también muestra el uso de almacenamiento de cada cuenta configurada (créditos
+usados, MB), y avisa si falta configurar alguna en vez de fallar en silencio.
 
 ## Deploy
 
