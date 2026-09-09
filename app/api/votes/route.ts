@@ -3,6 +3,8 @@ import { getSupabaseServerClient } from '../../../lib/supabaseServer'
 import { isLocalMode } from '../../../lib/localMode'
 import { getVotes } from '../../../lib/db/voteStore'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   const folder = req.nextUrl.searchParams.get('folder')
   if (!folder) {

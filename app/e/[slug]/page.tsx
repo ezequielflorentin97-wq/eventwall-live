@@ -5,6 +5,8 @@ import { getEventBySlug } from '../../../lib/db/localStore'
 import { EventApp } from '../../../components/event-app/EventApp'
 import type { EventConfig } from '../../../lib/config'
 
+export const dynamic = 'force-dynamic'
+
 export default async function EventPage({
   params,
   searchParams,

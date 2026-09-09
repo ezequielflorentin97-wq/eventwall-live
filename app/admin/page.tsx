@@ -4,6 +4,11 @@ import { isLocalMode } from '../../lib/localMode'
 import { listEvents as listLocalEvents, type EventRow } from '../../lib/db/localStore'
 import styles from '../../components/admin/AdminUI.module.css'
 
+// Reads live event data on every request — without this, some hosting
+// adapters cache the rendered HTML and a newly paid/configured event won't
+// show up in the list until the cache happens to expire.
+export const dynamic = 'force-dynamic'
+
 const TIER_LABEL: Record<string, string> = { basico: 'Básico', estandar: 'Estándar', premium: 'Premium' }
 
 async function loadEvents(): Promise<EventRow[]> {

@@ -5,6 +5,8 @@ import { listEvents as listLocalEvents } from '../../../../lib/db/localStore'
 import { fetchEventAnalytics } from '../../../../lib/analytics'
 import type { EventConfig } from '../../../../lib/config'
 
+export const dynamic = 'force-dynamic'
+
 export default async function EventAnalyticsPage({ params }: { params: Promise<{ eventId: string }> }) {
   const { eventId } = await params
 

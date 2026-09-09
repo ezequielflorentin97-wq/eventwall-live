@@ -6,6 +6,8 @@ import { daysRemaining } from '../../../../lib/retention'
 import { DownloadAllButton } from '../../../../components/event-app/DownloadAllButton'
 import type { EventConfig } from '../../../../lib/config'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DownloadPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
