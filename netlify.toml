@@ -1,5 +1,8 @@
 [build]
-  command = "npm run build"
+  # Turbopack's middleware output isn't compatible with Netlify's Edge
+  # Function bundler yet (MODULE_NOT_FOUND on a turbopack runtime chunk) —
+  # webpack's build output works fine with it.
+  command = "next build --webpack"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
