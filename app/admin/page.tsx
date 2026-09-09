@@ -77,6 +77,9 @@ function EventCard({ event: ev }: { event: EventRow }) {
             <Link href={`/admin/${ev.id}/analytics`} className={styles.actionBtn}>
               📊 Estadísticas
             </Link>
+            <Link href={`/admin/${ev.id}/wizard`} className={styles.actionBtn}>
+              🎨 Editar diseño
+            </Link>
           </>
         )}
 

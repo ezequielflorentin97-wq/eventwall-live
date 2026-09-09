@@ -53,6 +53,11 @@ export async function getEventBySlug(slug: string, status?: EventStatus): Promis
   return events.find((e) => e.slug === slug && (!status || e.status === status)) ?? null
 }
 
+export async function getEventById(id: string): Promise<EventRow | null> {
+  const events = await readAll()
+  return events.find((e) => e.id === id) ?? null
+}
+
 export async function insertEvent(input: {
   tier: EventTier
   customer_name?: string | null
