@@ -24,23 +24,29 @@ export async function uploadPhoto(blob: Blob, folder: string, guestName?: string
   throw new Error(`No se pudo subir la foto a ninguna cuenta de Cloudinary: ${String(lastError)}`)
 }
 
-type CloudinaryResource = { secure_url?: string; url?: string; created_at: string; public_id: string }
+// The `image/list/<tag>.json` endpoint does NOT include secure_url/url in
+// its resources (unlike the upload response) — only public_id/version/format.
+// The delivery URL has to be built by hand from those.
+type CloudinaryResource = { public_id: string; version: number; format: string; created_at: string }
 
 export type PhotoEntry = { url: string; publicId: string; createdAt: string }
 
 export async function fetchPhotoEntries(folder: string): Promise<PhotoEntry[]> {
   const results = await Promise.allSettled(
     CLOUDS.map((c) =>
-      fetch(`https://res.cloudinary.com/${c.name}/image/list/${folder}.json`).then((r) => r.json())
+      fetch(`https://res.cloudinary.com/${c.name}/image/list/${folder}.json`).then(async (r) => ({
+        cloud: c.name,
+        body: (await r.json()) as { resources?: CloudinaryResource[] },
+      }))
     )
   )
 
   const entries: PhotoEntry[] = []
   for (const r of results) {
-    if (r.status === 'fulfilled' && Array.isArray(r.value?.resources)) {
-      for (const res of r.value.resources as CloudinaryResource[]) {
-        const url = res.secure_url ?? res.url
-        if (url) entries.push({ url, publicId: res.public_id, createdAt: res.created_at })
+    if (r.status === 'fulfilled' && Array.isArray(r.value.body.resources)) {
+      for (const res of r.value.body.resources) {
+        const url = `https://res.cloudinary.com/${r.value.cloud}/image/upload/v${res.version}/${res.public_id}.${res.format}`
+        entries.push({ url, publicId: res.public_id, createdAt: res.created_at })
       }
     }
   }
