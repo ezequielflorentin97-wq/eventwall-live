@@ -32,7 +32,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ tier
         return NextResponse.json({ error: `No se pudo crear el evento en Supabase: ${error.message}` }, { status: 500 })
       }
     }
-    return NextResponse.redirect(new URL('/admin', req.url))
+    return NextResponse.redirect(new URL('/checkout/gracias', req.url))
   }
 
   const { initPoint } = await createCheckoutPreference(tier as TierId)
