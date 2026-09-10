@@ -1,15 +1,25 @@
 'use client'
 import { useEffect, useState } from 'react'
 import type { EventConfig } from '../../../lib/config'
+import type { View } from '../viewTypes'
 import { checkRateLimit, registerUpload } from '../useRateLimit'
 import { uploadPhoto } from '../useCloudinary'
 import { compressImage } from '../compressImage'
 import { queuePhoto, listQueued, removeQueued } from '../offlineQueue'
 import styles from '../EventApp.module.css'
 
-export function UploadView({ config, onBack }: { config: EventConfig; onBack: () => void }) {
+export function UploadView({
+  config,
+  onBack,
+  onNavigate,
+}: {
+  config: EventConfig
+  onBack: () => void
+  onNavigate: (v: View) => void
+}) {
   const [status, setStatus] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [uploaded, setUploaded] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
 
   async function flushQueue() {
@@ -48,6 +58,7 @@ export function UploadView({ config, onBack }: { config: EventConfig; onBack: ()
       return
     }
     setUploading(true)
+    setUploaded(false)
     setStatus('Subiendo...')
     try {
       const compressed = await compressImage(file)
@@ -55,6 +66,7 @@ export function UploadView({ config, onBack }: { config: EventConfig; onBack: ()
         await uploadPhoto(compressed, config.cloudinaryFolder)
         registerUpload()
         setStatus('¡Foto compartida!')
+        setUploaded(true)
       } catch {
         await queuePhoto(config.cloudinaryFolder, compressed)
         registerUpload()
@@ -66,6 +78,11 @@ export function UploadView({ config, onBack }: { config: EventConfig; onBack: ()
     } finally {
       setUploading(false)
     }
+  }
+
+  function handleUploadAnother() {
+    setUploaded(false)
+    setStatus('')
   }
 
   return (
@@ -80,15 +97,31 @@ export function UploadView({ config, onBack }: { config: EventConfig; onBack: ()
         dangerouslySetInnerHTML={{ __html: config.texts.uploadTitle }}
       />
 
-      <div className={styles.uploadChoices}>
-        <UploadButton label="🖼 Elegir de galería" disabled={uploading} onFile={handleFile} />
-        <UploadButton label="📷 Sacar foto" disabled={uploading} capture onFile={handleFile} />
-      </div>
+      {!uploaded && (
+        <div className={styles.uploadChoices}>
+          <UploadButton label="🖼 Elegir de galería" disabled={uploading} onFile={handleFile} />
+          <UploadButton label="📷 Sacar foto" disabled={uploading} capture onFile={handleFile} />
+        </div>
+      )}
 
       <p className={styles.statusText} role="status">
         {status}
       </p>
       {pendingCount > 0 && <p className={styles.pendingText}>{pendingCount} foto(s) esperando señal para enviarse…</p>}
+
+      {uploaded && (
+        <div className={styles.uploadChoices}>
+          <button className={styles.btn} onClick={handleUploadAnother}>
+            📷 Subir otra
+          </button>
+          <button className={styles.btnSolid} onClick={() => onNavigate('gallery')}>
+            ❤️ Ver galería y votar
+          </button>
+          <button className={styles.btnGhost} onClick={onBack}>
+            ← Volver al inicio
+          </button>
+        </div>
+      )}
     </div>
   )
 }
