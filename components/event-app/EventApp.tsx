@@ -3,10 +3,11 @@ import { useState, type CSSProperties } from 'react'
 import type { EventConfig } from '../../lib/config'
 import type { View } from './viewTypes'
 import { HomeView } from './views/HomeView'
+import { HostHomeView } from './views/HostHomeView'
 import { QrView } from './views/QrView'
 import { UploadView } from './views/UploadView'
 import { DisplayView } from './views/DisplayView'
-import { RankingView } from './views/RankingView'
+import { GalleryVoteView } from './views/GalleryVoteView'
 
 export function EventApp({
   config,
@@ -36,10 +37,11 @@ export function EventApp({
   return (
     <div style={style}>
       {view === 'home' && <HomeView config={config} onNavigate={setView} />}
+      {view === 'hostHome' && <HostHomeView config={config} onNavigate={setView} />}
       {view === 'qr' && <QrView config={config} guestUrl={guestUrl} onBack={goHome} />}
-      {view === 'upload' && <UploadView config={config} onBack={goHome} />}
+      {view === 'upload' && <UploadView config={config} onBack={goHome} onNavigate={setView} />}
       {view === 'display' && <DisplayView config={config} onBack={goHome} />}
-      {view === 'ranking' && <RankingView config={config} onBack={goHome} />}
+      {view === 'gallery' && <GalleryVoteView config={config} onBack={goHome} />}
     </div>
   )
 }
