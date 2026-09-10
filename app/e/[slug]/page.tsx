@@ -29,7 +29,7 @@ export default async function EventPage({
     <EventApp
       config={event.config as EventConfig}
       guestUrl={guestUrl}
-      initialView={mode === 'camera' ? 'upload' : 'home'}
+      initialView={mode === 'camera' ? 'upload' : mode === 'pantalla' ? 'hostHome' : 'home'}
     />
   )
 }
