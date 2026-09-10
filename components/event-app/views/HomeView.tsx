@@ -20,17 +20,11 @@ export function HomeView({ config, onNavigate }: { config: EventConfig; onNaviga
         <p className={styles.eyebrow}>Recuerdos en vivo</p>
       </div>
       <div className={styles.btnGrid}>
-        <button className={styles.btnSolid} onClick={() => onNavigate('display')}>
-          ▶ Pantalla
-        </button>
-        <button className={styles.btn} onClick={() => onNavigate('qr')}>
-          QR invitados
-        </button>
-        <button className={styles.btn} onClick={() => onNavigate('upload')}>
+        <button className={styles.btnSolid} onClick={() => onNavigate('upload')}>
           📷 Subir foto
         </button>
-        <button className={styles.btnGhost} onClick={() => onNavigate('ranking')}>
-          🏆 Ranking
+        <button className={styles.btn} onClick={() => onNavigate('gallery')}>
+          ❤️ Me gusta
         </button>
       </div>
     </div>
