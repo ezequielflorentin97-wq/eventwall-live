@@ -32,7 +32,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ tier
         return NextResponse.json({ error: `No se pudo crear el evento en Supabase: ${error.message}` }, { status: 500 })
       }
     }
-    return NextResponse.redirect(new URL('/checkout/gracias', req.url))
+    // Building the redirect from req.url picks up whatever internal host
+    // Netlify's proxy resolved the request against (its per-deploy
+    // subdomain), not the public domain — same reason back_urls in
+    // lib/mercadopago.ts use NEXT_PUBLIC_BASE_URL instead of req.url.
+    return NextResponse.redirect(new URL('/checkout/gracias', process.env.NEXT_PUBLIC_BASE_URL))
   }
 
   const { initPoint } = await createCheckoutPreference(tier as TierId)
