@@ -1,1 +1,1 @@
-export type View = 'home' | 'qr' | 'upload' | 'display' | 'ranking'
+export type View = 'home' | 'hostHome' | 'qr' | 'upload' | 'display' | 'gallery'
