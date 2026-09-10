@@ -2,12 +2,10 @@
 import { useEffect, useState } from 'react'
 import type { EventConfig } from '../../../lib/config'
 import { fetchPhotoEntries, type PhotoEntry } from '../useCloudinary'
-import { castVote, fetchVotes, hasVoted } from '../useVotes'
 import styles from '../EventApp.module.css'
 
 export function DisplayView({ config, onBack }: { config: EventConfig; onBack: () => void }) {
   const [photos, setPhotos] = useState<PhotoEntry[]>([])
-  const [votes, setVotes] = useState<Record<string, number>>({})
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
 
@@ -17,10 +15,9 @@ export function DisplayView({ config, onBack }: { config: EventConfig; onBack: (
     let pauseTimer: ReturnType<typeof setTimeout> | undefined
 
     async function loadAndLoop() {
-      const [entries, voteMap] = await Promise.all([fetchPhotoEntries(config.cloudinaryFolder), fetchVotes(config.cloudinaryFolder)])
+      const entries = await fetchPhotoEntries(config.cloudinaryFolder)
       if (cancelled) return
       setPhotos(entries)
-      setVotes(voteMap)
       setIndex(0)
       setPaused(false)
 
@@ -49,28 +46,21 @@ export function DisplayView({ config, onBack }: { config: EventConfig; onBack: (
   }, [config.cloudinaryFolder, config.slideshow.slideMs, config.slideshow.pauseMs])
 
   const current = photos[index]
-  const alreadyVoted = current ? hasVoted(config.cloudinaryFolder, current.publicId) : false
-
-  async function handleVote() {
-    if (!current || alreadyVoted) return
-    const newCount = await castVote(config.cloudinaryFolder, current.publicId)
-    setVotes((v) => ({ ...v, [current.publicId]: newCount }))
-  }
 
   return (
     <div className={styles.stage}>
       {current && (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img key={current.publicId} src={current.url} alt="" className={styles.photo} />
-          <button className={styles.voteBtn} onClick={handleVote} disabled={alreadyVoted}>
-            {alreadyVoted ? '❤️' : '🤍'} {votes[current.publicId] ?? 0}
-          </button>
-        </>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={current.publicId} src={current.url} alt="" className={styles.photo} />
       )}
       {photos.length === 0 && <p className={styles.helperText}>Esperando las primeras fotos…</p>}
       <div className={styles.stageFooter}>
-        <p className={styles.stageFooterText} style={{ fontFamily: config.fonts.display, color: 'var(--primary)' }} dangerouslySetInnerHTML={{ __html: config.texts.footerText }} />
+        <p
+          className={styles.stageFooterText}
+          style={{ fontFamily: config.fonts.display, color: 'var(--primary)' }}
+          dangerouslySetInnerHTML={{ __html: config.texts.footerText }}
+        />
+        <p className={styles.voteHint}>¡Votá la mejor foto desde ❤️ Me gusta en tu celular!</p>
       </div>
       {paused && <div className={styles.refreshBadge}>Actualizando fotos…</div>}
       {config.logoUrl && (

@@ -244,6 +244,13 @@
   text-transform: uppercase;
 }
 
+.voteHint {
+  margin-top: 0.4rem;
+  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
 .voteBtn {
   composes: btn;
   position: fixed;
