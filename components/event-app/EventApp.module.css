@@ -310,3 +310,9 @@
   letter-spacing: 0.04em;
   opacity: 0.85;
 }
+
+.rankVoteBtn {
+  composes: btn;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+}
