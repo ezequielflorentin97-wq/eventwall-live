@@ -128,6 +128,9 @@ function EventCard({ event: ev }: { event: EventRow }) {
             <Link href={`/e/${ev.slug}`} className={styles.actionPrimary}>
               ▶ Ver evento
             </Link>
+            <Link href={`/e/${ev.slug}?mode=pantalla`} className={styles.actionBtn}>
+              📺 Pantalla (host)
+            </Link>
             <Link href={`/e/${ev.slug}/descargar`} className={styles.actionAccent}>
               ⬇ Link de descarga
             </Link>
