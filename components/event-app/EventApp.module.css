@@ -211,7 +211,7 @@
 
 .photo {
   max-width: 74vw;
-  max-height: 76vh;
+  max-height: 66vh;
   object-fit: contain;
   border-radius: 14px;
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
@@ -255,6 +255,18 @@
   composes: btn;
   position: fixed;
   top: 1.2rem;
+  right: 1.2rem;
+  z-index: 20;
+  font-size: 1rem;
+  padding: 0.6rem 1.1rem;
+  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+}
+
+.rankingCornerBtn {
+  composes: btn;
+  position: fixed;
+  bottom: 1.2rem;
   right: 1.2rem;
   z-index: 20;
   font-size: 1rem;

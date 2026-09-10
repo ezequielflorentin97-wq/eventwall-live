@@ -2,12 +2,14 @@
 import { useEffect, useState } from 'react'
 import type { EventConfig } from '../../../lib/config'
 import { fetchPhotoEntries, type PhotoEntry } from '../useCloudinary'
+import { GalleryVoteView } from './GalleryVoteView'
 import styles from '../EventApp.module.css'
 
 export function DisplayView({ config, onBack }: { config: EventConfig; onBack: () => void }) {
   const [photos, setPhotos] = useState<PhotoEntry[]>([])
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [showRanking, setShowRanking] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -47,6 +49,10 @@ export function DisplayView({ config, onBack }: { config: EventConfig; onBack: (
 
   const current = photos[index]
 
+  if (showRanking) {
+    return <GalleryVoteView config={config} onBack={() => setShowRanking(false)} />
+  }
+
   return (
     <div className={styles.stage}>
       {current && (
@@ -69,6 +75,9 @@ export function DisplayView({ config, onBack }: { config: EventConfig; onBack: (
       )}
       <button className={styles.backBtn} onClick={onBack}>
         ← Volver
+      </button>
+      <button className={styles.rankingCornerBtn} onClick={() => setShowRanking(true)}>
+        🏆 Ranking
       </button>
     </div>
   )
