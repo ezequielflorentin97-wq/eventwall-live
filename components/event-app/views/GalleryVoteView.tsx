@@ -2,8 +2,9 @@
 import { useEffect, useState } from 'react'
 import type { EventConfig } from '../../../lib/config'
 import { fetchPhotoEntries, type PhotoEntry } from '../useCloudinary'
-import { castVote, fetchVotes, hasVoted } from '../useVotes'
+import { castVote, uncastVote, fetchVotes, hasVoted } from '../useVotes'
 import { sortByVotes } from '../../../lib/sortByVotes'
+import { HeartIcon } from '../HeartIcon'
 import styles from '../EventApp.module.css'
 
 type RankedPhoto = PhotoEntry & { votes: number }
@@ -28,10 +29,17 @@ export function GalleryVoteView({ config, onBack }: { config: EventConfig; onBac
   }, [config.cloudinaryFolder])
 
   async function handleVote(photoId: string) {
-    if (votedIds.has(photoId)) return
-    const newCount = await castVote(config.cloudinaryFolder, photoId)
+    const alreadyVoted = votedIds.has(photoId)
+    const newCount = alreadyVoted
+      ? await uncastVote(config.cloudinaryFolder, photoId)
+      : await castVote(config.cloudinaryFolder, photoId)
     setRanked((prev) => sortByVotes(prev.map((p) => (p.publicId === photoId ? { ...p, votes: newCount } : p))))
-    setVotedIds((prev) => new Set(prev).add(photoId))
+    setVotedIds((prev) => {
+      const next = new Set(prev)
+      if (alreadyVoted) next.delete(photoId)
+      else next.add(photoId)
+      return next
+    })
   }
 
   return (
@@ -54,8 +62,8 @@ export function GalleryVoteView({ config, onBack }: { config: EventConfig; onBac
             <div key={photo.publicId} className={styles.rankCard}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={photo.url} alt="" className={styles.rankImg} />
-              <button className={styles.rankVoteBtn} onClick={() => handleVote(photo.publicId)} disabled={voted}>
-                {voted ? '❤️' : '🤍'} {photo.votes}
+              <button className={styles.rankVoteBtn} onClick={() => handleVote(photo.publicId)}>
+                <HeartIcon filled={voted} /> {photo.votes}
               </button>
             </div>
           )

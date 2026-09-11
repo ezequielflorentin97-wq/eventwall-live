@@ -1,6 +1,7 @@
 import 'server-only'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
+import { clampDecrement } from '../voteMath'
 
 // Local-mode-only vote counters, mirrored in Supabase's `photo_votes` table
 // for production (see supabase/migrations/0002_votes.sql). Keyed by the
@@ -28,6 +29,15 @@ export async function incrementVote(folder: string, photoId: string): Promise<nu
   const all = await readAll()
   const forFolder = all[folder] ?? {}
   forFolder[photoId] = (forFolder[photoId] ?? 0) + 1
+  all[folder] = forFolder
+  await writeAll(all)
+  return forFolder[photoId]
+}
+
+export async function decrementVote(folder: string, photoId: string): Promise<number> {
+  const all = await readAll()
+  const forFolder = all[folder] ?? {}
+  forFolder[photoId] = clampDecrement(forFolder[photoId] ?? 0)
   all[folder] = forFolder
   await writeAll(all)
   return forFolder[photoId]

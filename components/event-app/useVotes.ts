@@ -23,6 +23,11 @@ function markVoted(folder: string, photoId: string) {
   localStorage.setItem(storageKey(folder), JSON.stringify(voted))
 }
 
+function unmarkVoted(folder: string, photoId: string) {
+  const voted = readVoted(folder).filter((id) => id !== photoId)
+  localStorage.setItem(storageKey(folder), JSON.stringify(voted))
+}
+
 export async function castVote(folder: string, photoId: string): Promise<number> {
   const res = await fetch('/api/vote', {
     method: 'POST',
@@ -31,6 +36,18 @@ export async function castVote(folder: string, photoId: string): Promise<number>
   })
   if (!res.ok) throw new Error('No se pudo votar')
   markVoted(folder, photoId)
+  const body = await res.json()
+  return body.votes as number
+}
+
+export async function uncastVote(folder: string, photoId: string): Promise<number> {
+  const res = await fetch('/api/vote', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder, photoId }),
+  })
+  if (!res.ok) throw new Error('No se pudo deshacer el voto')
+  unmarkVoted(folder, photoId)
   const body = await res.json()
   return body.votes as number
 }
