@@ -44,6 +44,21 @@
   border-radius: 999px;
 }
 
+.logoutBtn {
+  font-size: 0.78rem;
+  font-family: inherit;
+  color: #666;
+  background: none;
+  border: 1px solid #d9d9e0;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+
+.logoutBtn:hover {
+  background: #f4f4f7;
+}
+
 .eventList {
   display: flex;
   flex-direction: column;

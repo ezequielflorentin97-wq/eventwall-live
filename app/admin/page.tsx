@@ -3,6 +3,7 @@ import { getSupabaseServerClient } from '../../lib/supabaseServer'
 import { isLocalMode } from '../../lib/localMode'
 import { listEvents as listLocalEvents, type EventRow } from '../../lib/db/localStore'
 import { fetchStorageUsage } from '../../lib/cloudinaryAdmin'
+import { logout } from './actions'
 import { EmptyPhotosButton } from '../../components/admin/EmptyPhotosButton'
 import styles from '../../components/admin/AdminUI.module.css'
 
@@ -30,6 +31,11 @@ export default async function AdminEventList() {
       <div className={styles.header}>
         <h1>Eventos</h1>
         {isLocalMode() && <span className={styles.localBadge}>modo local · local-data/events.json</span>}
+        <form action={logout}>
+          <button type="submit" className={styles.logoutBtn}>
+            Cerrar sesión
+          </button>
+        </form>
       </div>
 
       <StorageUsage />

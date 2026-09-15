@@ -1,6 +1,10 @@
 'use server'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { createServerClient } from '@supabase/ssr'
 import { getSupabaseServerClient } from '../../lib/supabaseServer'
 import { isLocalMode } from '../../lib/localMode'
+import { LOCAL_SESSION_COOKIE } from '../../lib/localSessionCookie'
 import {
   listSlugs as listLocalSlugs,
   updateEvent as updateLocalEvent,
@@ -12,6 +16,29 @@ import { slugify, withSuffixIfTaken } from '../../lib/slug'
 import { computeExpiresAt } from '../../lib/retention'
 import { PRESETS } from '../../lib/presets'
 import { deleteFolderPhotos, type DeleteFolderResult } from '../../lib/cloudinaryAdmin'
+
+// There was no way to end an admin session short of clearing cookies by
+// hand — once logged in, the Supabase session (or the local-mode cookie)
+// just persisted, which read as "stuck logged in from cache".
+export async function logout(): Promise<never> {
+  const store = await cookies()
+
+  if (isLocalMode()) {
+    store.delete(LOCAL_SESSION_COOKIE)
+  } else {
+    const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+      cookies: {
+        getAll: () => store.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => store.set(name, value, options))
+        },
+      },
+    })
+    await supabase.auth.signOut()
+  }
+
+  redirect('/admin/login')
+}
 
 export type WizardInitialData = {
   eventName: string

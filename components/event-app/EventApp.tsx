@@ -33,14 +33,17 @@ export function EventApp({
   } as CSSProperties
 
   const goHome = () => setView('home')
+  // 'qr' and 'display' are only ever reached from HostHomeView — their
+  // back button must return there, not to the guest home.
+  const goHostHome = () => setView('hostHome')
 
   return (
     <div style={style}>
       {view === 'home' && <HomeView config={config} onNavigate={setView} />}
       {view === 'hostHome' && <HostHomeView config={config} onNavigate={setView} />}
-      {view === 'qr' && <QrView config={config} guestUrl={guestUrl} onBack={goHome} />}
+      {view === 'qr' && <QrView config={config} guestUrl={guestUrl} onBack={goHostHome} />}
       {view === 'upload' && <UploadView config={config} onBack={goHome} onNavigate={setView} />}
-      {view === 'display' && <DisplayView config={config} onBack={goHome} />}
+      {view === 'display' && <DisplayView config={config} onBack={goHostHome} />}
       {view === 'gallery' && <GalleryVoteView config={config} onBack={goHome} />}
     </div>
   )
