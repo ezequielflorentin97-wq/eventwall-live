@@ -5,6 +5,7 @@ import { listEvents as listLocalEvents, type EventRow } from '../../lib/db/local
 import { fetchStorageUsage } from '../../lib/cloudinaryAdmin'
 import { logout } from './actions'
 import { EmptyPhotosButton } from '../../components/admin/EmptyPhotosButton'
+import { DownloadQrButton } from '../../components/admin/DownloadQrButton'
 import styles from '../../components/admin/AdminUI.module.css'
 
 // Reads live event data on every request — without this, some hosting
@@ -146,6 +147,11 @@ function EventCard({ event: ev }: { event: EventRow }) {
             <Link href={`/admin/${ev.id}/wizard`} className={styles.actionBtn}>
               🎨 Editar diseño
             </Link>
+            <DownloadQrButton
+              guestUrl={`${process.env.NEXT_PUBLIC_BASE_URL}/e/${ev.slug}?mode=camera`}
+              qrColor={ev.config?.qrColor ?? '#000000'}
+              fileName={`qr-${ev.slug}`}
+            />
             <EmptyPhotosButton eventId={ev.id} eventName={eventName} />
           </>
         )}

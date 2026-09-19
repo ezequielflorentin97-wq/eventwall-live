@@ -2,17 +2,7 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 
-export function QrCode({
-  value,
-  color,
-  size = 220,
-  onReady,
-}: {
-  value: string
-  color: string
-  size?: number
-  onReady?: (dataUrl: string) => void
-}) {
+export function QrCode({ value, color, size = 220 }: { value: string; color: string; size?: number }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null)
 
   useEffect(() => {
@@ -22,14 +12,11 @@ export function QrCode({
       margin: 1,
       color: { dark: color, light: '#FFFFFF' },
     }).then((url) => {
-      if (cancelled) return
-      setDataUrl(url)
-      onReady?.(url)
+      if (!cancelled) setDataUrl(url)
     })
     return () => {
       cancelled = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, color, size])
 
   if (!dataUrl) {
