@@ -55,6 +55,7 @@ export function DisplayView({ config, onBack }: { config: EventConfig; onBack: (
 
   return (
     <div className={styles.stage}>
+      <p className={styles.brandWatermark}>Recuerdos en vivo</p>
       {current && (
         // eslint-disable-next-line @next/next/no-img-element
         <img key={current.publicId} src={current.url} alt="" className={styles.photo} />

@@ -251,6 +251,19 @@
   opacity: 0.75;
 }
 
+.brandWatermark {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  opacity: 0.4;
+  z-index: 5;
+  pointer-events: none;
+}
+
 .voteBtn {
   composes: btn;
   position: fixed;
