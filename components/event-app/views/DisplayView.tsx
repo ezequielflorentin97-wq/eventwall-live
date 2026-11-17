@@ -3,10 +3,14 @@ import { useEffect, useState } from 'react'
 import type { EventConfig } from '../../../lib/config'
 import { fetchPhotoEntries, type PhotoEntry } from '../useCloudinary'
 import { GalleryVoteView } from './GalleryVoteView'
+import { buildSlides, type Slide } from '../../../lib/buildSlides'
 import styles from '../EventApp.module.css'
 
+// A "vote for the best photo" slide is interleaved after every N photos.
+const PROMO_EVERY = 5
+
 export function DisplayView({ config, onBack }: { config: EventConfig; onBack: () => void }) {
-  const [photos, setPhotos] = useState<PhotoEntry[]>([])
+  const [slides, setSlides] = useState<Slide<PhotoEntry>[]>([])
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
   const [showRanking, setShowRanking] = useState(false)
@@ -19,18 +23,19 @@ export function DisplayView({ config, onBack }: { config: EventConfig; onBack: (
     async function loadAndLoop() {
       const entries = await fetchPhotoEntries(config.cloudinaryFolder)
       if (cancelled) return
-      setPhotos(entries)
+      const built = buildSlides(entries, PROMO_EVERY)
+      setSlides(built)
       setIndex(0)
       setPaused(false)
 
-      if (entries.length === 0) {
+      if (built.length === 0) {
         pauseTimer = setTimeout(loadAndLoop, config.slideshow.pauseMs)
         return
       }
 
       slideTimer = setInterval(() => {
         setIndex((i) => {
-          if (i + 1 < entries.length) return i + 1
+          if (i + 1 < built.length) return i + 1
           clearInterval(slideTimer)
           setPaused(true)
           pauseTimer = setTimeout(loadAndLoop, config.slideshow.pauseMs)
@@ -47,7 +52,7 @@ export function DisplayView({ config, onBack }: { config: EventConfig; onBack: (
     }
   }, [config.cloudinaryFolder, config.slideshow.slideMs, config.slideshow.pauseMs])
 
-  const current = photos[index]
+  const current = slides[index]
 
   if (showRanking) {
     return <GalleryVoteView config={config} onBack={() => setShowRanking(false)} />
@@ -56,11 +61,20 @@ export function DisplayView({ config, onBack }: { config: EventConfig; onBack: (
   return (
     <div className={styles.stage}>
       <p className={styles.brandWatermark}>Recuerdos en vivo</p>
-      {current && (
+      {current?.kind === 'photo' && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img key={current.publicId} src={current.url} alt="" className={styles.photo} />
+        <img key={current.photo.publicId} src={current.photo.url} alt="" className={styles.photo} />
       )}
-      {photos.length === 0 && <p className={styles.helperText}>Esperando las primeras fotos…</p>}
+      {current?.kind === 'promo' && (
+        <div key={`promo-${index}`} className={styles.promoSlide}>
+          <p className={styles.promoTitle} style={{ fontFamily: config.fonts.display, color: 'var(--primary)' }}>
+            ¡Votá la mejor foto!
+          </p>
+          <p className={styles.promoLine}>Escaneá el QR de tu mesa y tocá ❤️ Me gusta</p>
+          <p className={styles.promoPrize}>🏆 La foto más votada se gana un premio</p>
+        </div>
+      )}
+      {slides.length === 0 && <p className={styles.helperText}>Esperando las primeras fotos…</p>}
       <div className={styles.stageFooter}>
         <p
           className={styles.stageFooterText}
